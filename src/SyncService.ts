@@ -1,20 +1,21 @@
-import AbstractStore from "./AbstractStore";
+import AbstractStore from './AbstractStore';
+import { RequestMessage } from './Events';
 import {
     ConnectionStatusListenerForStore,
     ConnectionStatusListenerSilent,
     IConnectionStatusListener
 } from './IConnectionStatusListener';
+import ISyncService from './ISyncService';
 import StateSyncStatusReducer from './StateSyncStatusReducer';
 import StompConnection from './StompConnection';
 import SyncArea from './SyncArea';
-import SyncAreaConfig from './SyncAreaConfig';
 import SyncAreaHelper from './SyncAreaHelper';
 import SyncAreaRegistry from './SyncAreaRegistry';
 
 import SyncConfig from './SyncConfig';
-import purify from './utils/purify';
 
-export default class SyncService implements SyncAreaHelper {
+export default class SyncService implements ISyncService, SyncAreaHelper {
+
     private store: AbstractStore;
     private areas: SyncAreaRegistry;
     private connection: StompConnection;
@@ -28,6 +29,7 @@ export default class SyncService implements SyncAreaHelper {
     /**
      * Connect store to remote server
      * @param store
+     * @param url
      * @param {SyncConfig} config
      */
     public connect(store: any, url: string, config: SyncConfig): void {
@@ -38,19 +40,28 @@ export default class SyncService implements SyncAreaHelper {
             if (!this.connectionStatusListener) {
                 this.connectionStatusListener = new ConnectionStatusListenerSilent();
             }
-            this.connection = new StompConnection(this.config, this.connectionStatusListener, this.areas);
+            this.connection = new StompConnection(this.config, this.connectionStatusListener, this.areas, () => this.onReady());
         }
+    }
+
+    dispatch(action: object): void {
+        this.store.dispatch(action);
+    }
+
+    send(event: RequestMessage): void {
+        this.connection.send(event);
     }
 
     /**
      * Declare sync area and return reducer for this area
+     *
      * @param {string} name
-     * @param {SyncAreaConfig} config
-     * @param reducer - optional reducer over same area
-     * @returns {any}
+     * @param initialState
+     * @param reducer
+     * @returns reducer
      */
-    public declareArea(name: string, config: SyncAreaConfig, reducer: any): any {
-        let area = new SyncArea(name, config, this);
+    public declareArea(name: string, initialState: any, reducer: any): any {
+        let area = new SyncArea(name, initialState, this);
         this.areas.add(area);
         return area.wrap(reducer);
     }
@@ -62,5 +73,9 @@ export default class SyncService implements SyncAreaHelper {
     public declareStatusArea(): any {
         this.connectionStatusListener = new ConnectionStatusListenerForStore(this.store);
         return StateSyncStatusReducer;
+    }
+
+    private onReady() {
+        this.areas.forEach(a => a.onReady());
     }
 }

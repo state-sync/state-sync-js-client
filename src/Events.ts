@@ -1,4 +1,4 @@
-import { ClientAreaConfig } from "./ClientAreaConfig";
+import SyncAreaConfig from './SyncAreaConfig';
 
 export interface Message {
     type: string;
@@ -46,6 +46,7 @@ export class PatchAreaRequest extends RequestMessage {
         this.patch = patch;
     }
 }
+
 export interface PatchAreaEvent extends EventMessage {
     type: 'p'; //reduce traffic
     area: string;
@@ -75,7 +76,7 @@ export class SubscribeAreaRequest extends RequestMessage {
 export interface SubscribeAreaResponse extends ResponseMessage {
     type: 'areaSubscription';
     area: string;
-    config: ClientAreaConfig;
+    config: SyncAreaConfig;
     model: object;
 }
 

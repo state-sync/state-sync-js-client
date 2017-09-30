@@ -1,6 +1,6 @@
 import { Client, client, Options, Subscription } from 'webstomp-client';
-import { IEventListener } from "./IEventListener";
-import { IConnectionStatusListener } from "./IConnectionStatusListener";
+import { IConnectionStatusListener } from './IConnectionStatusListener';
+import { IEventListener } from './IEventListener';
 import SyncConfig from './SyncConfig';
 
 export default class StompConnection {
@@ -13,11 +13,13 @@ export default class StompConnection {
     private eventListener: IEventListener;
     private config: SyncConfig;
     private stompClient: Client;
+    private onReady: () => any;
 
-    public constructor(config: SyncConfig, statusListener: IConnectionStatusListener, eventListener: IEventListener) {
+    public constructor(config: SyncConfig, statusListener: IConnectionStatusListener, eventListener: IEventListener, onReady: () => any) {
         this.config = config;
         this.statusListener = statusListener;
         this.eventListener = eventListener;
+        this.onReady = onReady;
         this.statusListener.onDisconnect();
     }
 
@@ -60,6 +62,8 @@ export default class StompConnection {
             event.channel = 'session';
             this.eventListener.onEvent(event);
         });
+        this.statusListener.onReady();
+        this.onReady();
     }
 
 }

@@ -1,9 +1,6 @@
-import StompConnection from "./StompConnection";
-import SyncService from "./SyncService";
+import ISyncService from './ISyncService';
+import SyncService from './SyncService';
 
-export type StompConnection = StompConnection;
-export type SyncService = SyncService;
-
-const StatSync = new SyncService();
+const StatSync: ISyncService = new SyncService();
 
 export default StatSync;
