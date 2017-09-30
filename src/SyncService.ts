@@ -1,4 +1,4 @@
-import SyncArea from "../dist/SyncArea";
+import SyncArea from "./SyncArea";
 import {
     IncomingEvents,
     InitSessionResponse,
@@ -55,28 +55,29 @@ export default class SyncService implements IEventListener {
     }
 
     private onPatchAreaResponse(event: PatchAreaResponse) {
-        this.areas[event.area].patchResponse(event);
+        this.areas[event.area].onPatchResponse(event);
     }
 
     private onPatchAreaEvent(event: PatchAreaEvent) {
-        this.areas[event.area].serverPatch(event);
+        this.areas[event.area].onServerPatch(event);
     }
 
     private onSubscribeAreaResponse(event: SubscribeAreaResponse) {
-        this.areas[event.area].serverPatch(event);
+        this.areas[event.area].onSubscribe(event);
     }
 
     private onUnsubscribeAreaResponse(event: UnsubscribeAreaResponse) {
-
+        this.areas[event.area].onUnsubscribe(event);
     }
 
     // errors
     private onPatchAreaError(event: PatchAreaFail) {
-
+        this.areas[event.area].onPatchAreaError(event);
+        console.error(event);
     }
 
     private onSubscribeAreaFail(event: SubscribeAreaFail) {
-
+        this.areas[event.area].onSubscribeError(event);
+        console.error(event);
     }
-
 }

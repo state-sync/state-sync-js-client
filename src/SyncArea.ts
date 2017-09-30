@@ -1,4 +1,8 @@
 import { SyncAreaHelper } from "./SyncAreaHelper";
+import {
+    PatchAreaEvent, PatchAreaFail, PatchAreaResponse, SubscribeAreaFail, SubscribeAreaResponse,
+    UnsubscribeAreaResponse
+} from "./Events";
 
 export default class SyncArea {
     private helper: SyncAreaHelper;
@@ -9,7 +13,27 @@ export default class SyncArea {
         this.name = name;
     }
 
-    patchResponse(event: PatchAreaResponse) {
+    onPatchResponse(event: PatchAreaResponse) {
+
+    }
+
+    onServerPatch(event: PatchAreaEvent) {
         
+    }
+
+    onSubscribe(event: SubscribeAreaResponse) {
+        
+    }
+
+    onUnsubscribe(event: UnsubscribeAreaResponse) {
+        
+    }
+
+    onPatchAreaError(event: PatchAreaFail) {
+
+    }
+
+    onSubscribeError(event: SubscribeAreaFail) {
+
     }
 }
