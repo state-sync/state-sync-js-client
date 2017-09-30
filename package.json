@@ -5,6 +5,14 @@
   "main": "dist/index.js",
   "repository": "https://github.com/state-sync/state-sync-js-client.git",
   "author": "Fedor Ilinykh <ify@kibibox.com>",
+  "keywords": [
+    "statesync",
+    "state-sync",
+    "redux",
+    "ngrx",
+    "react",
+    "angular"
+  ],
   "license": "Apache-2.0",
   "private": false,
   "devDependencies": {
