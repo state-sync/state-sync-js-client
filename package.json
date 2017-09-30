@@ -1,6 +1,6 @@
 {
   "name": "@state-sync/js-client",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "state-sync client",
   "main": "dist/index.js",
   "repository": "https://github.com/state-sync/state-sync-js-client.git",
