@@ -1,4 +1,6 @@
-import { SyncAreaHelper } from "./SyncAreaHelper";
+import SyncAreaHelper from "./SyncAreaHelper";
+import SyncAreaConfig from './SyncAreaConfig';
+
 import {
     PatchAreaEvent, PatchAreaFail, PatchAreaResponse, SubscribeAreaFail, SubscribeAreaResponse,
     UnsubscribeAreaResponse
@@ -7,10 +9,16 @@ import {
 export default class SyncArea {
     private helper: SyncAreaHelper;
     private name: string;
+    private config: SyncAreaConfig;
 
-    constructor(helper : SyncAreaHelper, name: string) {
+    constructor(name: string, config: SyncAreaConfig, helper : SyncAreaHelper) {
+        this.config = config;
         this.helper = helper;
         this.name = name;
+    }
+
+    wrap(reducer: any): any {
+
     }
 
     onPatchResponse(event: PatchAreaResponse) {

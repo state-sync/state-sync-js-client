@@ -1,3 +1,3 @@
-export interface SyncAreaHelper {
+export default interface SyncAreaHelper {
 
 }
