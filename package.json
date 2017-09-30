@@ -1,6 +1,6 @@
 {
   "name": "@state-sync/js-client",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "state-sync client",
   "main": "dist/index.js",
   "repository": "https://github.com/state-sync/state-sync-js-client.git",
@@ -8,11 +8,13 @@
   "license": "Apache-2.0",
   "private": false,
   "devDependencies": {
+    "typedoc": "^0.8.0",
     "typescript": "^2.5.3"
   },
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsdoc": "node ./node_modules/typedoc/bin/typedoc --out tsdoc"
   },
   "dependencies": {
     "@types/es6-promise": "^0.0.33",
