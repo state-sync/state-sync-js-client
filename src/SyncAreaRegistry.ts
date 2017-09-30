@@ -1,4 +1,3 @@
-import SyncArea from './SyncArea';
 import {
     IncomingEvents,
     InitSessionResponse,
@@ -10,12 +9,23 @@ import {
     UnsubscribeAreaResponse
 } from './Events';
 import { IEventListener } from './IEventListener';
+import SyncArea from './SyncArea';
 
 export default class SyncAreaRegistry implements IEventListener {
-    public areas: { [p: string]: SyncArea };
+    private areas: { [p: string]: SyncArea };
 
     public constructor() {
         this.areas = {};
+    }
+
+    public add(area: SyncArea) {
+        this.areas[area.name] = area;
+    }
+
+    public forEach(callback: (area: SyncArea) => any): void {
+        for(var key in this.areas) {
+            callback(this.areas[key]);
+        }
     }
 
     public onEvent(event: IncomingEvents): void {

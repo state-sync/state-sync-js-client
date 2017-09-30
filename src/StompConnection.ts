@@ -9,7 +9,7 @@ export default class StompConnection {
     private userToken: any;
     private rootSubscription: Subscription;
     private sessionToken: string;
-    private statusListener: IConnectionStatusListener;
+    public statusListener: IConnectionStatusListener;
     private eventListener: IEventListener;
     private config: SyncConfig;
     private stompClient: Client;

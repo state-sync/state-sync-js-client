@@ -8,7 +8,7 @@ import {
 
 export default class SyncArea {
     private helper: SyncAreaHelper;
-    private name: string;
+    public name: string;
     private config: SyncAreaConfig;
 
     constructor(name: string, config: SyncAreaConfig, helper : SyncAreaHelper) {
@@ -17,7 +17,15 @@ export default class SyncArea {
         this.name = name;
     }
 
+    init() {
+
+    }
+
     wrap(reducer: any): any {
+        return (state:any, action:any) => this.reduce(state, action, reducer);
+    }
+
+    private reduce(state: any, action: any, reducer: any) {
 
     }
 
@@ -44,4 +52,5 @@ export default class SyncArea {
     onSubscribeError(event: SubscribeAreaFail) {
 
     }
+
 }

@@ -1,3 +1,5 @@
+import AbstractStore from "./AbstractStore";
+
 export interface IConnectionStatusListener {
     onConnecting(): void;
 
@@ -26,14 +28,14 @@ export class ConnectionStatusListenerSilent {
  * Delivery
  */
 export class ConnectionStatusListenerForStore {
-    private store: any;
+    private store: AbstractStore;
 
-    constructor(store: any) {
+    constructor(store: AbstractStore) {
         this.store = store;
     }
 
     private dispatchStatus(status: string) {
-        this.store.dispatch({type: 'STATE_SYNC_JS_CLIENT_CONNECTION_STATUS', status: status});
+        this.store.dispatch({__stateSyncEvent__: 'CONNECTION_STATUS', status: status});
     }
 
     public onConnecting(): void {

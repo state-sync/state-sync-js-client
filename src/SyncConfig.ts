@@ -3,9 +3,15 @@ export default class SyncConfig {
     debug: boolean;
     timeout: number;
     debugConnectFrame: boolean;
-    constructor(url : string) {
-        this.url = url;
+
+    constructor() {
         this.debug = false;
         this.timeout = 5000;
+    }
+
+    static build(url: string, config: SyncConfig) {
+        config = config ? config : new SyncConfig();
+        config.url = url;
+        return config;
     }
 }
