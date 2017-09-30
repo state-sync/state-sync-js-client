@@ -60,7 +60,7 @@ export default class SyncService implements ISyncService, SyncAreaHelper {
      * @param reducer
      * @returns reducer
      */
-    public declareArea(name: string, initialState: any, reducer: any): any {
+    public declareArea(name: string, initialState: any, reducer?: any): any {
         let area = new SyncArea(name, initialState, this);
         this.areas.add(area);
         return area.wrap(reducer);

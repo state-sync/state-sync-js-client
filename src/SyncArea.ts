@@ -1,3 +1,4 @@
+import { Promise } from 'es6-promise';
 import * as jiff from 'jiff';
 import * as jsonpatch from 'jsonpatch';
 
@@ -6,6 +7,7 @@ import {
     PatchAreaFail,
     PatchAreaRequest,
     PatchAreaResponse,
+    RpcRequest,
     SubscribeAreaFail,
     SubscribeAreaRequest,
     SubscribeAreaResponse,
@@ -32,6 +34,7 @@ export default class SyncArea {
     private lastHandledRequest: number;
     private patchQueue: Array<PatchAreaEvent> = [];
     private local: any;
+    private promises: { [p: number]: any } = {};
 
     constructor(name: string, initialState: any, helper: SyncAreaHelper) {
         this.initialState = initialState;
@@ -68,6 +71,22 @@ export default class SyncArea {
             this.lastRequestId++;
             this.helper.send(new UnsubscribeAreaRequest(this.lastRequestId, this.name));
         }
+    }
+
+    public remote(command: string, parameters: any) {
+        let rid = this.lastRequestId++;
+        this.helper.send(new RpcRequest(rid, this.name, command, parameters));
+        const promise = new Promise<number>((resolve, reject) => {
+            this.promises[rid] = resolve;
+            setTimeout(() => {
+                let p = this.promises[rid];
+                if (p) {
+                    p();
+                    delete this.promises[rid];
+                }
+            }, this.config.commandTimeout);
+        });
+        return promise;
     }
 
     public onSubscribe(event: SubscribeAreaResponse) {

@@ -1,6 +1,6 @@
 import ISyncService from './ISyncService';
 import SyncService from './SyncService';
 
-const StatSync: ISyncService = new SyncService();
+const StateSync: ISyncService = new SyncService();
 
-export default StatSync;
+export default StateSync;

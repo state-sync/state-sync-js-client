@@ -89,6 +89,19 @@ export class UnsubscribeAreaRequest extends RequestMessage {
     }
 }
 
+export class RpcRequest extends RequestMessage {
+    area: string;
+    command: string;
+    parameners: any;
+
+    constructor(id: number, area: string, command: string, parameners: any) {
+        super(id, 'rpc');
+        this.area = area;
+        this.command = command;
+        this.parameners = parameners;
+    }
+}
+
 export interface UnsubscribeAreaResponse extends ResponseMessage {
     type: 'areaUnsubscriptionSuccess';
     area: string;
