@@ -1,0 +1,13 @@
+{
+  "name": "state-sync-js-client",
+  "version": "1.0.0",
+  "description": "state-sync client",
+  "main": "index.js",
+  "repository": "https://github.com/state-sync/state-sync-js-client.git",
+  "author": "Fedor Ilinykh <ify@kibibox.com>",
+  "license": "Apache 2.0",
+  "private": false,
+  "devDependencies": {
+    "typescript": "^2.5.3"
+  }
+}
