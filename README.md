@@ -1,3 +1,3 @@
-# state-sync-js-client
+# @state-sync/js-client
 
-The
+Javascript client designed to synchronize Redux/NgRx store to server.

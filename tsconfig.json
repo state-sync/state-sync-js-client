@@ -8,10 +8,12 @@
     "types": [
       "jiff"
     ],
-    "baseUrl": "types",
+    "baseUrl": "./src/",
     "typeRoots": [
-      "types"
-    ]
+      "types",
+      "./node_modules/@types"
+    ],
+    "allowJs": true
   },
   "lib": [
     "ES5",
