@@ -4,15 +4,14 @@
 export default interface AbstractStore {
     /**
      * Dispatch action
-     * @param action
-     * @returns {any}
+     * @param action action to dispatch, state-sync specially to not mae assumptions on action structure
      */
-    dispatch(action: any): any;
+    dispatch(action: any): void;
 
     /**
-     * Subscribe to store
-     * @param listener
-     * @returns {any}
+     * Subscribe to the store. This method is used during initialization and we sdo not care about unsubscribing.
+     * That is why return value is defined as void.
+     * @param subscriber subscribing function
      */
-    subscribe(listener: any): any;
+    subscribe(subscriber: any): void;
 }

@@ -1,35 +1,86 @@
 import SyncAreaConfig from './SyncAreaConfig';
 
+/**
+ * Generic representation of messages flying between client and server
+ */
 export interface Message {
+    /**
+     * All messages are identified by type. Read about discriminated unions first
+     * @link https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions
+     */
     type: string;
 }
 
+/**
+ * Event message is come form server side and signals about some model changes do not related to user actions.
+ */
 export interface EventMessage extends Message {
 
 }
 
-export class RequestMessage implements Message {
+/**
+ * Request message sent by client. Server must respond with one of response messages.
+ */
+export abstract class RequestMessage implements Message {
+    /**
+     * See Message#type description
+     */
     type: string;
+    /**
+     * Identifier of request in the scope of current session
+     */
     id: number;
 
+    /**
+     * Construct new request message
+     * @param {number} id request identifier
+     * @param {string} type request type
+     */
     constructor(id: number, type: string) {
         this.id = id;
         this.type = type;
     }
 }
 
+/**
+ * Resposen message for user request.
+ * Response message to not provide any other information except request id and message type.
+ * Basic flow to all request/response are:
+ * - client sent request
+ * - server respond with json path to all user sessions (to sync data across browsers)
+ * - server respond with response message
+ */
 export interface ResponseMessage extends Message {
+    /**
+     * Identifier of original request
+     */
     forId: number;
 }
 
-// init
+/**
+ * Event received as request of client connect to stat-sync server.
+ */
 export interface InitSessionResponse extends EventMessage {
+    /**
+     * Event id
+     */
     type: 'init';
+    /**
+     * Session token is issued by server and used by client to securely subscribe to changes relevant to session.
+     */
     sessionToken: string;
+    /**
+     * User token is issued by server and used by client to securely subscribe to changes
+     * relevant to user in any connected session.
+     */
     userToken: string;
 }
 
-// patch
+//---------------- code review stop
+
+/**
+ *
+ */
 export interface PatchAreaFail {
     type: 'patchAreaError';
     area: string;
