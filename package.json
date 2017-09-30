@@ -5,9 +5,16 @@
   "main": "index.js",
   "repository": "https://github.com/state-sync/state-sync-js-client.git",
   "author": "Fedor Ilinykh <ify@kibibox.com>",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "private": false,
   "devDependencies": {
     "typescript": "^2.5.3"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "webstomp-client": "^1.0.8"
   }
 }
