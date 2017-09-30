@@ -12,8 +12,7 @@
     "typeRoots": [
       "types",
       "./node_modules/@types"
-    ],
-    "allowJs": true
+    ]
   },
   "lib": [
     "ES5",
