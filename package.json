@@ -1,8 +1,9 @@
 {
   "name": "@state-sync/js-client",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "state-sync client",
   "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "repository": "https://github.com/state-sync/state-sync-js-client.git",
   "author": "Fedor Ilinykh <ify@kibibox.com>",
   "keywords": [
@@ -20,12 +21,13 @@
     "typescript": "^2.5.3"
   },
   "scripts": {
+    "prepublish": "yarn run build",
+    "publish": "yarn run build",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsdoc": "node ./node_modules/typedoc/bin/typedoc --out tsdoc"
   },
   "dependencies": {
-    "@types/es6-promise": "^0.0.33",
     "jiff": "^0.7.3",
     "jsonpatch": "^3.0.1",
     "webstomp-client": "^1.0.8"
