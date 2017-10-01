@@ -1,13 +1,13 @@
-import { Promise } from 'es6-promise';
+//import { Promise } from 'es6-promise';
 import * as jiff from 'jiff';
 import * as jsonpatch from 'jsonpatch';
+import { ISyncArea } from './ISyncArea';
 
 import {
     PatchAreaEvent,
     PatchAreaFail,
     PatchAreaRequest,
     PatchAreaResponse,
-    RpcRequest,
     SubscribeAreaFail,
     SubscribeAreaRequest,
     SubscribeAreaResponse,
@@ -18,7 +18,7 @@ import SyncAreaConfig from './SyncAreaConfig';
 import SyncAreaHelper from './SyncAreaHelper';
 import find from './utils/find';
 
-export default class SyncArea {
+export class SyncArea implements ISyncArea {
     lastRequestId: any;
     private helper: SyncAreaHelper;
     public name: string;
@@ -73,35 +73,35 @@ export default class SyncArea {
         }
     }
 
-    public remote(command: string, parameters: any) {
-        let rid = this.lastRequestId++;
-        this.helper.send(new RpcRequest(rid, this.name, command, parameters));
-        const promise = new Promise<number>((resolve, reject) => {
-            this.promises[rid] = resolve;
-            setTimeout(() => {
-                let p = this.promises[rid];
-                if (p) {
-                    p();
-                    delete this.promises[rid];
-                }
-            }, this.config.commandTimeout);
-        });
-        return promise;
-    }
+    // public remote(command: string, parameters: any) {
+    //     let rid = this.lastRequestId++;
+    //     this.helper.send(new RpcRequest(rid, this.name, command, parameters));
+    //     const promise = new Promise<number>((resolve, reject) => {
+    //         this.promises[rid] = resolve;
+    //         setTimeout(() => {
+    //             let p = this.promises[rid];
+    //             if (p) {
+    //                 p();
+    //                 delete this.promises[rid];
+    //             }
+    //         }, this.config.commandTimeout);
+    //     });
+    //     return promise;
+    // }
 
     public onSubscribe(event: SubscribeAreaResponse) {
         this.config = event.config;
-        this.helper.dispatch({__stateSyncEvent__: 'SYNC_AREA_INIT', payload: event.model});
+        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', payload: event.model});
     }
 
     // tslint:disable
     public onUnsubscribe(_event: UnsubscribeAreaResponse) {
         this.config = new SyncAreaConfig();
-        this.helper.dispatch({__stateSyncEvent__: 'SYNC_AREA_INIT', payload: this.initialState});
+        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', payload: this.initialState});
     }
 
     public dispatchSyncPatch(event: PatchAreaEvent) {
-        this.helper.dispatch({type: 'SYNC_AREA_PATCH', area: event.area, payload: event.patch});
+        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_PATCH', area: event.area, payload: event.patch});
     }
 
     public onPatchResponse(event: PatchAreaResponse) {
@@ -126,7 +126,7 @@ export default class SyncArea {
 
     public actionReplace(path: string, value: any) {
         this.helper.dispatch({
-            type: 'SYNC_AREA_LOCAL_PATCH', area: this.name, payload: [{
+            type: '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH', area: this.name, payload: [{
                 op: 'replace', path: path, value: value
             }]
         });
@@ -149,14 +149,14 @@ export default class SyncArea {
 
         //sync
         try {
-            const fit = action.__stateSyncEvent__ && (this.name === action.area);
+            const fit = (this.name === action.area) && action.type.indeOf('@STATE_SYNC/') === 0;
             if (fit) {
-                switch (action.__stateSyncEvent__) {
-                    case 'SYNC_AREA_INIT':
+                switch (action.type) {
+                    case '@STATE_SYNC/SYNC_AREA_INIT':
                         return this.local = this.shadow = action.payload;
-                    case 'SYNC_AREA_SERVER_PATCH':
+                    case '@STATE_SYNC/SYNC_AREA_SERVER_PATCH':
                         return this.local = this.shadow = jsonpatch.apply_patch(state, action.payload);
-                    case 'SYNC_AREA_LOCAL_PATCH':
+                    case '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH':
                         try {
                             return this.detectChanges(state, this.local = jsonpatch.apply_patch(state, action.payload));
                         } catch (e) {
@@ -173,20 +173,23 @@ export default class SyncArea {
     }
 
     private detectChanges(from: any, to: any) {
-        let patch = jiff.diff(from, to);
-        let roots = this.config.clientPush;
-        let prefix = '/' + this.config.clientLocalPrefix;
-        patch = patch
-            .filter(op => op.path.indexOf(prefix) < 0)
-            .filter(
-                op => roots.filter(
-                    root => op.path.indexOf(root) === 0
-                ).length > 0);
+        if(this.config) {
+            let patch = jiff.diff(from, to);
+            let roots = this.config.clientPush;
+            let prefix = '/' + this.config.clientLocalPrefix;
+            patch = patch
+                .filter(op => op.path.indexOf(prefix) < 0)
+                .filter(
+                    op => roots.filter(
+                        root => op.path.indexOf(root) === 0
+                    ).length > 0);
 
-        if (patch.length > 0) {
-            this.lastRequestId++;
-            this.helper.send(new PatchAreaRequest(this.lastRequestId, this.name, patch));
+            if (patch.length > 0) {
+                this.lastRequestId++;
+                this.helper.send(new PatchAreaRequest(this.lastRequestId, this.name, patch));
+            }
         }
+        return to;
     }
 
 }

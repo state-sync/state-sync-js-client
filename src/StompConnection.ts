@@ -1,7 +1,7 @@
 import { Client, client, Options, Subscription } from 'webstomp-client';
 import { IConnectionStatusListener } from './IConnectionStatusListener';
 import { IEventListener } from './IEventListener';
-import SyncConfig from './SyncConfig';
+import { SyncConfig } from './SyncConfig';
 
 export default class StompConnection {
     private sessionSubscription: Subscription;

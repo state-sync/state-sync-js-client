@@ -1,4 +1,4 @@
-export default class SyncConfig {
+export class SyncConfig {
     public url: string;
     debug: boolean;
     timeout: number;
@@ -9,7 +9,7 @@ export default class SyncConfig {
         this.timeout = 5000;
     }
 
-    static build(url: string, config: SyncConfig) {
+    static build(url: string, config?: SyncConfig) {
         config = config ? config : new SyncConfig();
         config.url = url;
         return config;

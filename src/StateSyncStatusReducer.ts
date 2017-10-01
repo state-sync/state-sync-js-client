@@ -1,5 +1,5 @@
 function connectionStatusReducer(state = 'initialized', action: any) {
-    switch (action.__stateSyncEvent__) {
+    switch (action.type) {
         case 'CONNECTION_STATUS':
             return action.status;
         default:
@@ -8,7 +8,7 @@ function connectionStatusReducer(state = 'initialized', action: any) {
 }
 
 function areasStatusReducer(state = {}, action: any) {
-    switch (action.__stateSyncEvent__) {
+    switch (action.type) {
         case 'SYNC_AREA_STATUS':
             let t = <any>{...state};
             t[action.area] = action.status;

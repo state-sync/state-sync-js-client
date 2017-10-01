@@ -14,10 +14,10 @@
       "./node_modules/@types"
     ]
   },
+  "include": [
+    "src/**/*"
+  ],
   "lib": [
-    "ES5",
-    "ES2015",
-    "DOM",
-    "ScriptHost"
+    "es5"
   ]
 }

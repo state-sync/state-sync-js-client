@@ -9,7 +9,7 @@ import {
     UnsubscribeAreaResponse
 } from './Events';
 import { IEventListener } from './IEventListener';
-import SyncArea from './SyncArea';
+import { SyncArea } from './SyncArea';
 
 export default class SyncAreaRegistry implements IEventListener {
     private areas: { [p: string]: SyncArea };

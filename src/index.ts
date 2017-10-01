@@ -1,6 +1,4 @@
-import ISyncService from './ISyncService';
-import SyncService from './SyncService';
-
-const StateSync: ISyncService = new SyncService();
-
-export default StateSync;
+export { ISyncService } from './ISyncService';
+export { ISyncArea } from './ISyncArea';
+export { StateSync } from './SyncService';
+export { SyncConfig } from './SyncConfig';

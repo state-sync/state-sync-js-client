@@ -5,14 +5,14 @@ import {
     ConnectionStatusListenerSilent,
     IConnectionStatusListener
 } from './IConnectionStatusListener';
-import ISyncService from './ISyncService';
+import { ISyncService } from './ISyncService';
 import StateSyncStatusReducer from './StateSyncStatusReducer';
 import StompConnection from './StompConnection';
-import SyncArea from './SyncArea';
+import { SyncArea } from './SyncArea';
 import SyncAreaHelper from './SyncAreaHelper';
 import SyncAreaRegistry from './SyncAreaRegistry';
 
-import SyncConfig from './SyncConfig';
+import { SyncConfig } from './SyncConfig';
 
 export default class SyncService implements ISyncService, SyncAreaHelper {
 
@@ -32,7 +32,7 @@ export default class SyncService implements ISyncService, SyncAreaHelper {
      * @param url
      * @param {SyncConfig} config
      */
-    public connect(store: any, url: string, config: SyncConfig): void {
+    public initSync(store: any, url: string, config?: SyncConfig): void {
         this.config = SyncConfig.build(url, config);
         this.store = store;
         this.areas.forEach((area) => area.init());
@@ -71,11 +71,17 @@ export default class SyncService implements ISyncService, SyncAreaHelper {
      * @returns reducer
      */
     public declareStatusArea(): any {
-        this.connectionStatusListener = new ConnectionStatusListenerForStore(this.store);
+        this.connectionStatusListener = new ConnectionStatusListenerForStore(() => this.store);
         return StateSyncStatusReducer;
     }
 
     private onReady() {
         this.areas.forEach(a => a.onReady());
     }
+}
+
+let Instance: ISyncService = new SyncService();
+
+export const StateSync = (): ISyncService => {
+    return Instance
 }

@@ -54,25 +54,25 @@ export class ConnectionStatusListenerSilent implements IConnectionStatusListener
 
 /**
  * Delivery connection status to the store (redux or NgRx). Events dispatched as store events with
- * special "__stateSyncEvent__" field instead of normally user "type" field. It is done intentionally to
+ * special "type" field instead of normally user "type" field. It is done intentionally to
  * prevent interference with usual UI actions.
  */
 export class ConnectionStatusListenerForStore implements IConnectionStatusListener {
     /**
      * Reference to the store
      */
-    private store: AbstractStore;
+    private storeProvider: () => AbstractStore;
 
     /**
      * Construct listener using provider store interface
      * @param {AbstractStore} store
      */
-    constructor(store: AbstractStore) {
-        this.store = store;
+    constructor(storeProvider: () => AbstractStore) {
+        this.storeProvider = storeProvider;
     }
 
     private dispatchStatus(status: string) {
-        this.store.dispatch({__stateSyncEvent__: 'CONNECTION_STATUS', status: status});
+        this.storeProvider().dispatch({type: '@STATE_SYNC/CONNECTION_STATUS', status: status});
     }
 
     public onReady(): void {
