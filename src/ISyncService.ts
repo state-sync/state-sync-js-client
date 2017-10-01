@@ -1,4 +1,5 @@
 import { SyncConfig } from './SyncConfig';
+import { ISyncArea } from "./ISyncArea";
 
 export interface ISyncService {
     /**
@@ -24,4 +25,11 @@ export interface ISyncService {
      * @returns reducer
      */
     declareStatusArea(): any
+
+    /**
+     * Returns api for declared area
+     * @param {string} area
+     * @returns {ISyncArea}
+     */
+    area(area: string): ISyncArea;
 }

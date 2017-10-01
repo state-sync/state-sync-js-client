@@ -13,8 +13,9 @@ import SyncAreaHelper from './SyncAreaHelper';
 import SyncAreaRegistry from './SyncAreaRegistry';
 
 import { SyncConfig } from './SyncConfig';
+import { ISyncArea } from "./ISyncArea";
 
-export default class SyncService implements ISyncService, SyncAreaHelper {
+class SyncService implements ISyncService, SyncAreaHelper {
 
     private store: AbstractStore;
     private areas: SyncAreaRegistry;
@@ -65,6 +66,9 @@ export default class SyncService implements ISyncService, SyncAreaHelper {
         this.areas.add(area);
         return area.wrap(reducer);
     }
+    public area(name: string): ISyncArea {
+        return this.areas.get(name);
+    }
 
     /**
      * Declare status reducer
@@ -83,5 +87,5 @@ export default class SyncService implements ISyncService, SyncAreaHelper {
 let Instance: ISyncService = new SyncService();
 
 export const StateSync = (): ISyncService => {
-    return Instance
-}
+    return Instance;
+};

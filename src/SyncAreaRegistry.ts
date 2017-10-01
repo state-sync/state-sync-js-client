@@ -10,6 +10,7 @@ import {
 } from './Events';
 import { IEventListener } from './IEventListener';
 import { SyncArea } from './SyncArea';
+import { ISyncArea } from "./ISyncArea";
 
 export default class SyncAreaRegistry implements IEventListener {
     private areas: { [p: string]: SyncArea };
@@ -22,8 +23,12 @@ export default class SyncAreaRegistry implements IEventListener {
         this.areas[area.name] = area;
     }
 
+    public get(name: string): ISyncArea {
+        return this.areas[name];
+    }
+
     public forEach(callback: (area: SyncArea) => any): void {
-        for(var key in this.areas) {
+        for (var key in this.areas) {
             callback(this.areas[key]);
         }
     }
