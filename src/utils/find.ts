@@ -8,13 +8,7 @@ function parse(pathStr: string) {
     let split, path = [];
     // Split up the path
     split = pathStr.split('/');
-    if ('' !== split[0]) {
-        throw new Error('');
-    }
-    for (let i = 1; i < split.length; i++) {
-        path[i - 1] = split[i].replace(/~1/g, '/').replace(/~0/g, '~');
-    }
-    return path;
+    return split.splice(1);
 }
 
 /**
