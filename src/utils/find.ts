@@ -18,7 +18,7 @@ function parse(pathStr: string) {
  * @returns {any} value or null
  */
 function find(model: any, path: string) {
-    for (let seg in parse(path)) {
+    for (let seg of parse(path)) {
         if (model === null) {
             return null;
         } else if (model instanceof Array) {
