@@ -2,4 +2,4 @@
 
 Javascript client designed to synchronize Redux/NgRx store to server.
 
-See: https://github.com/state-sync/state-sync/blob/master/README.md
+See root description at [state-sync] (https://github.com/state-sync/state-sync/blob/master/README.md) repository.
