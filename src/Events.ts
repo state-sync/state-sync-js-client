@@ -81,7 +81,7 @@ export interface InitSessionResponse extends EventMessage {
 /**
  *
  */
-export interface PatchAreaFail {
+export interface PatchAreaError {
     type: 'patchAreaError';
     area: string;
     error: string;
@@ -109,7 +109,7 @@ export interface PatchAreaResponse extends ResponseMessage {
     area: string;
 }
 
-export interface SubscribeAreaFail extends ResponseMessage {
+export interface SubscribeAreaError extends ResponseMessage {
     type: 'areaSubscriptionError';
     area: string;
     error: string;
@@ -122,6 +122,29 @@ export class SubscribeAreaRequest extends RequestMessage {
         super(id, 'subscribeArea');
         this.area = area;
     }
+}
+export class SignalRequest extends RequestMessage {
+    area: string;
+    private signal: string;
+    private parameters: any;
+
+    constructor(id: number, area: string, signal: string, parameters?: any) {
+        super(id, 'signal');
+        this.area = area;
+        this.signal = signal;
+        this.parameters = parameters;
+    }
+}
+
+export interface SignalResponse extends ResponseMessage {
+    type: 'signalResponse';
+    area: string;
+}
+
+export interface SignalError extends ResponseMessage {
+    type: 'signalError';
+    area: string;
+    error: string;
 }
 
 export interface SubscribeAreaResponse extends ResponseMessage {
@@ -140,19 +163,6 @@ export class UnsubscribeAreaRequest extends RequestMessage {
     }
 }
 
-export class RpcRequest extends RequestMessage {
-    area: string;
-    command: string;
-    parameners: any;
-
-    constructor(id: number, area: string, command: string, parameners: any) {
-        super(id, 'rpc');
-        this.area = area;
-        this.command = command;
-        this.parameners = parameners;
-    }
-}
-
 export interface UnsubscribeAreaResponse extends ResponseMessage {
     type: 'areaUnsubscriptionSuccess';
     area: string;
@@ -161,11 +171,14 @@ export interface UnsubscribeAreaResponse extends ResponseMessage {
 export type IncomingEvents =
     | InitSessionResponse
 
-    | PatchAreaFail
+    | PatchAreaError
     | PatchAreaResponse
     | PatchAreaEvent
 
-    | SubscribeAreaFail
+    | SignalResponse
+    | SignalError
+
+    | SubscribeAreaError
     | SubscribeAreaResponse
 
     | UnsubscribeAreaResponse

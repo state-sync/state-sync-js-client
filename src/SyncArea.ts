@@ -1,19 +1,22 @@
 //import { Promise } from 'es6-promise';
 import * as jiff from 'jiff';
 import * as jsonpatch from 'jsonpatch';
-import { ISyncArea } from './ISyncArea';
 
 import {
+    PatchAreaError,
     PatchAreaEvent,
-    PatchAreaFail,
     PatchAreaRequest,
     PatchAreaResponse,
-    SubscribeAreaFail,
+    SignalError,
+    SignalRequest,
+    SignalResponse,
+    SubscribeAreaError,
     SubscribeAreaRequest,
     SubscribeAreaResponse,
     UnsubscribeAreaRequest,
     UnsubscribeAreaResponse
 } from './Events';
+import { ISyncArea } from './ISyncArea';
 import SyncAreaConfig from './SyncAreaConfig';
 import SyncAreaHelper from './SyncAreaHelper';
 import find from './utils/find';
@@ -79,21 +82,39 @@ export class SyncArea implements ISyncArea {
         }
     }
 
-    // public remote(command: string, parameters: any) {
-    //     let rid = this.lastRequestId++;
-    //     this.helper.send(new RpcRequest(rid, this.name, command, parameters));
-    //     const promise = new Promise<number>((resolve, reject) => {
-    //         this.promises[rid] = resolve;
-    //         setTimeout(() => {
-    //             let p = this.promises[rid];
-    //             if (p) {
-    //                 p();
-    //                 delete this.promises[rid];
-    //             }
-    //         }, this.config.commandTimeout);
-    //     });
-    //     return promise;
-    // }
+    public signal(command: string, parameters?: any): Promise<number> {
+        let rid = this.lastRequestId++;
+        this.helper.send(new SignalRequest(rid, this.name, command, parameters));
+        const promise = new Promise<number>((resolve, reject) => {
+            this.promises[rid] = {resolve: resolve, reject: reject};
+            setTimeout(() => {
+                let p = this.promises[rid];
+                if (p) {
+                    p.reject();
+                    delete this.promises[rid];
+                }
+            }, this.config.commandTimeout);
+        });
+        return promise;
+    }
+
+    public onSignalResponse(event: SignalResponse) {
+        this.lastHandledRequest = event.forId;
+        let p = this.promises[event.forId];
+        if (p) {
+            p.resolve(event.forId);
+            delete this.promises[event.forId];
+        }
+    }
+
+    public onSignalError(event: SignalError) {
+        this.lastHandledRequest = event.forId;
+        let p = this.promises[event.forId];
+        if (p) {
+            p.reject(event.error);
+            delete this.promises[event.forId];
+        }
+    }
 
     public onSubscribe(event: SubscribeAreaResponse) {
         this.lastHandledRequest = event.forId;
@@ -121,18 +142,18 @@ export class SyncArea implements ISyncArea {
     }
 
     public onServerPatch(event: PatchAreaEvent) {
-        if(this.lastHandledRequest === this.lastRequestId) {
+        if (this.lastHandledRequest === this.lastRequestId) {
             this.dispatchSyncPatch(event);
         } else {
             this.patchQueue.push(event);
         }
     }
 
-    public onPatchAreaError(event: PatchAreaFail) {
+    public onPatchAreaError(event: PatchAreaError) {
         console.error(event);
     }
 
-    public onSubscribeError(event: SubscribeAreaFail) {
+    public onSubscribeError(event: SubscribeAreaError) {
         console.error(event);
     }
 
@@ -144,6 +165,15 @@ export class SyncArea implements ISyncArea {
         });
     }
 
+    public actionReduce(path: string, reducer: <T> (state: T) => T): void {
+        try {
+            let value = find(this.local, path);
+            this.actionReplace(path, reducer(value));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     public actionToggle(path: string) {
         try {
             let value = find(this.local, path);
@@ -151,7 +181,6 @@ export class SyncArea implements ISyncArea {
         } catch (e) {
             console.error(e);
         }
-
     }
 
     private reduce(state: any, action: any, ext: any, reducer: any): any {
@@ -184,7 +213,7 @@ export class SyncArea implements ISyncArea {
     }
 
     private detectChanges(from: any, to: any) {
-        if(this.config) {
+        if (this.config) {
             let patch = jiff.diff(from, to);
             let roots = this.config.clientPush;
             let prefix = '/' + this.config.clientLocalPrefix;
@@ -203,5 +232,4 @@ export class SyncArea implements ISyncArea {
         }
         return to;
     }
-
 }

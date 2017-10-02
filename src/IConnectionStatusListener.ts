@@ -26,7 +26,7 @@ export interface IConnectionStatusListener {
     onConfigured(): void;
 
     /**
-     * Client is completely set up and can initialize syncareas.
+     * Client is completely set up and can initialize sync areas.
      */
     onReady(): void;
 }
@@ -53,9 +53,7 @@ export class ConnectionStatusListenerSilent implements IConnectionStatusListener
 }
 
 /**
- * Delivery connection status to the store (redux or NgRx). Events dispatched as store events with
- * special "type" field instead of normally user "type" field. It is done intentionally to
- * prevent interference with usual UI actions.
+ * Delivery connection status to the store (redux or NgRx).
  */
 export class ConnectionStatusListenerForStore implements IConnectionStatusListener {
     /**
@@ -65,7 +63,7 @@ export class ConnectionStatusListenerForStore implements IConnectionStatusListen
 
     /**
      * Construct listener using provider store interface
-     * @param {AbstractStore} store
+     * @param {AbstractStore} storeProvider
      */
     constructor(storeProvider: () => AbstractStore) {
         this.storeProvider = storeProvider;
@@ -78,7 +76,6 @@ export class ConnectionStatusListenerForStore implements IConnectionStatusListen
     public onReady(): void {
         this.dispatchStatus('ready');
     }
-
 
     public onConnecting(): void {
         this.dispatchStatus('connecting');

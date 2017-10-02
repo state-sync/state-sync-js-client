@@ -2,15 +2,16 @@ import {
     IncomingEvents,
     InitSessionResponse,
     PatchAreaEvent,
-    PatchAreaFail,
-    PatchAreaResponse,
-    SubscribeAreaFail,
+    PatchAreaError,
+    PatchAreaResponse, SignalError,
+    SignalResponse,
+    SubscribeAreaError,
     SubscribeAreaResponse,
     UnsubscribeAreaResponse
 } from './Events';
 import { IEventListener } from './IEventListener';
+import { ISyncArea } from './ISyncArea';
 import { SyncArea } from './SyncArea';
-import { ISyncArea } from "./ISyncArea";
 
 export default class SyncAreaRegistry implements IEventListener {
     private areas: { [p: string]: SyncArea };
@@ -20,6 +21,9 @@ export default class SyncAreaRegistry implements IEventListener {
     }
 
     public add(area: SyncArea) {
+        if(this.areas[area.name]) {
+            throw new Error("Sync area redeclaration "+ area.name);
+        }
         this.areas[area.name] = area;
     }
 
@@ -42,12 +46,20 @@ export default class SyncAreaRegistry implements IEventListener {
                 return this.onPatchAreaEvent(event);
             case 'patchAreaError':
                 return this.onPatchAreaError(event);
+
             // init & configure
             case 'init':
                 return this.onInit(event);
+
+            // signals
+            case 'signalResponse':
+                return this.onSignalResponse(event);
+            case 'signalError':
+                return this.onSignalError(event);
+
             // area subscription
             case 'areaSubscriptionError':
-                return this.onSubscribeAreaFail(event);
+                return this.onSubscribeAreaError(event);
             case 'areaSubscription':
                 return this.onSubscribeAreaResponse(event);
             case 'areaUnsubscriptionSuccess':
@@ -76,13 +88,21 @@ export default class SyncAreaRegistry implements IEventListener {
     }
 
     // errors
-    private onPatchAreaError(event: PatchAreaFail) {
+    private onPatchAreaError(event: PatchAreaError) {
         this.areas[event.area].onPatchAreaError(event);
         console.error(event);
     }
 
-    private onSubscribeAreaFail(event: SubscribeAreaFail) {
+    private onSubscribeAreaError(event: SubscribeAreaError) {
         this.areas[event.area].onSubscribeError(event);
         console.error(event);
+    }
+
+    private onSignalResponse(event: SignalResponse) {
+        this.areas[event.area].onSignalResponse(event);
+    }
+
+    private onSignalError(event: SignalError) {
+        this.areas[event.area].onSignalError(event);
     }
 }

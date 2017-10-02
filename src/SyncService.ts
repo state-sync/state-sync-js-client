@@ -5,7 +5,7 @@ import {
     ConnectionStatusListenerSilent,
     IConnectionStatusListener
 } from './IConnectionStatusListener';
-import { ISyncArea } from "./ISyncArea";
+import { ISyncArea } from './ISyncArea';
 import { ISyncService } from './ISyncService';
 import StateSyncStatusReducer from './StateSyncStatusReducer';
 import StompConnection from './StompConnection';
