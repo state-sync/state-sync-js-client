@@ -134,8 +134,7 @@ export class SyncArea implements ISyncArea {
 
     public actionToggle(path: string) {
         try {
-            let p = find(this.local, path);
-            let value = p.get(this.local);
+            let value = find(this.local, path);
             this.actionReplace(path, !value);
         } catch (e) {
             console.error(e);
@@ -149,7 +148,7 @@ export class SyncArea implements ISyncArea {
 
         //sync
         try {
-            const fit = (this.name === action.area) && action.type.indeOf('@STATE_SYNC/') === 0;
+            const fit = (this.name === action.area) && action.type.indexOf('@STATE_SYNC/') === 0;
             if (fit) {
                 switch (action.type) {
                     case '@STATE_SYNC/SYNC_AREA_INIT':
