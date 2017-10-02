@@ -54,7 +54,7 @@ export default class StompConnection {
 
     private onSystemConnected() {
         this.statusListener.onConfigured();
-        this.userSubscription = this.stompClient.subscribe('/user/' + this.userToken, (message) => {
+        this.userSubscription = this.stompClient.subscribe('/account/' + this.userToken, (message) => {
             let event = JSON.parse(message.body);
             event.channel = 'user';
             this.eventListener.onEvent(event);
