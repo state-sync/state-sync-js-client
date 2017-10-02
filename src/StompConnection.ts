@@ -14,6 +14,7 @@ export default class StompConnection {
     private config: SyncConfig;
     private stompClient: Client;
     private onReady: () => any;
+    private fullyConnected: boolean;
 
     public constructor(config: SyncConfig, statusListener: IConnectionStatusListener, eventListener: IEventListener, onReady: () => any) {
         this.config = config;
@@ -46,6 +47,7 @@ export default class StompConnection {
     }
 
     private onStompDisconnected() {
+        this.fullyConnected = false;
         this.statusListener.onDisconnect();
         setTimeout(() => this.connect(), this.config.timeout);
     }
@@ -62,8 +64,12 @@ export default class StompConnection {
             event.channel = 'session';
             this.eventListener.onEvent(event);
         });
+        this.fullyConnected = true;
         this.statusListener.onReady();
         this.onReady();
     }
 
+    isFullyConnected() {
+        return this.fullyConnected;
+    }
 }

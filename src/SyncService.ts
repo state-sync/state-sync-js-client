@@ -5,6 +5,7 @@ import {
     ConnectionStatusListenerSilent,
     IConnectionStatusListener
 } from './IConnectionStatusListener';
+import { ISyncArea } from "./ISyncArea";
 import { ISyncService } from './ISyncService';
 import StateSyncStatusReducer from './StateSyncStatusReducer';
 import StompConnection from './StompConnection';
@@ -13,9 +14,11 @@ import SyncAreaHelper from './SyncAreaHelper';
 import SyncAreaRegistry from './SyncAreaRegistry';
 
 import { SyncConfig } from './SyncConfig';
-import { ISyncArea } from "./ISyncArea";
 
 class SyncService implements ISyncService, SyncAreaHelper {
+    isFullyConnected(): boolean {
+        return this.connection.isFullyConnected();
+    }
 
     private store: AbstractStore;
     private areas: SyncAreaRegistry;
@@ -66,6 +69,7 @@ class SyncService implements ISyncService, SyncAreaHelper {
         this.areas.add(area);
         return area.wrap(reducer);
     }
+
     public area(name: string): ISyncArea {
         return this.areas.get(name);
     }
