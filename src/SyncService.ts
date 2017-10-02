@@ -45,6 +45,7 @@ class SyncService implements ISyncService, SyncAreaHelper {
                 this.connectionStatusListener = new ConnectionStatusListenerSilent();
             }
             this.connection = new StompConnection(this.config, this.connectionStatusListener, this.areas, () => this.onReady());
+            this.connection.connect();
         }
     }
 
