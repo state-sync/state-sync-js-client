@@ -38,6 +38,7 @@ export class SyncArea implements ISyncArea {
 
     constructor(name: string, initialState: any, helper: SyncAreaHelper) {
         this.lastRequestId = 0;
+        this.lastHandledRequest = 0;
         this.initialState = initialState;
         this.helper = helper;
         this.name = name;
@@ -95,12 +96,14 @@ export class SyncArea implements ISyncArea {
     // }
 
     public onSubscribe(event: SubscribeAreaResponse) {
+        this.lastHandledRequest = event.forId;
         this.config = event.config;
         this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', area: event.area, payload: event.model});
     }
 
     // tslint:disable
-    public onUnsubscribe(_event: UnsubscribeAreaResponse) {
+    public onUnsubscribe(event: UnsubscribeAreaResponse) {
+        this.lastHandledRequest = event.forId;
         this.config = new SyncAreaConfig();
         this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', payload: this.initialState});
     }
