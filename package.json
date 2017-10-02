@@ -1,6 +1,6 @@
 {
   "name": "@state-sync/js-client",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "state-sync client",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",

@@ -190,6 +190,7 @@ export class SyncArea implements ISyncArea {
             let prefix = '/' + this.config.clientLocalPrefix;
             patch = patch
                 .filter(op => op.path.indexOf(prefix) < 0)
+                .filter(op => op.op !== 'test')
                 .filter(
                     op => roots.filter(
                         root => op.path.indexOf(root) === 0
