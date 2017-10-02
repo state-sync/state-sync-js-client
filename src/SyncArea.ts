@@ -106,7 +106,7 @@ export class SyncArea implements ISyncArea {
     }
 
     public dispatchSyncPatch(event: PatchAreaEvent) {
-        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_PATCH', area: event.area, payload: event.patch});
+        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_SERVER_PATCH', area: event.area, payload: event.patch});
     }
 
     public onPatchResponse(event: PatchAreaResponse) {
