@@ -96,7 +96,7 @@ export class SyncArea implements ISyncArea {
 
     public onSubscribe(event: SubscribeAreaResponse) {
         this.config = event.config;
-        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', payload: event.model});
+        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', area: event.area, payload: event.model});
     }
 
     // tslint:disable
