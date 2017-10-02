@@ -118,7 +118,11 @@ export class SyncArea implements ISyncArea {
     }
 
     public onServerPatch(event: PatchAreaEvent) {
-        this.patchQueue.push(event);
+        if(this.lastHandledRequest === this.lastRequestId) {
+            this.dispatchSyncPatch(event);
+        } else {
+            this.patchQueue.push(event);
+        }
     }
 
     public onPatchAreaError(event: PatchAreaFail) {
