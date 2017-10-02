@@ -19,7 +19,7 @@ import SyncAreaHelper from './SyncAreaHelper';
 import find from './utils/find';
 
 export class SyncArea implements ISyncArea {
-    lastRequestId: any;
+    lastRequestId: number;
     private helper: SyncAreaHelper;
     public name: string;
 
@@ -37,6 +37,7 @@ export class SyncArea implements ISyncArea {
     private promises: { [p: number]: any } = {};
 
     constructor(name: string, initialState: any, helper: SyncAreaHelper) {
+        this.lastRequestId = 0;
         this.initialState = initialState;
         this.helper = helper;
         this.name = name;
