@@ -43,7 +43,7 @@ export abstract class RequestMessage implements Message {
 }
 
 /**
- * Resposen message for user request.
+ * Response message for user request.
  * Response message to not provide any other information except request id and message type.
  * Basic flow to all request/response are:
  * - client sent request
@@ -74,6 +74,10 @@ export interface InitSessionResponse extends EventMessage {
      * relevant to user in any connected session.
      */
     userToken: string;
+    /**
+     * Version of protocol
+     */
+    protocolVersion: string;
 }
 
 //---------------- code review stop
