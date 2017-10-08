@@ -56,6 +56,9 @@ export class SyncArea implements ISyncArea {
         return (state: any, action: any, ext: any) => this.reduce(state, action, ext, reducer);
     }
 
+    /**
+     * Invoke when connection is ready
+     */
     public onReady() {
         this.doSubscription();
     }
