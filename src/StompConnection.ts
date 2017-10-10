@@ -26,7 +26,12 @@ export default class StompConnection {
 
     public send(event: object) {
         let msg = JSON.stringify(event);
-        this.stompClient.send('/session/' + this.sessionToken, msg);
+        try {
+            this.stompClient.send('/session/' + this.sessionToken, msg);
+        } catch (err) {
+            console.log('StompConnection.send failed', msg);
+            throw err;
+        }
     }
 
     public connect() {
