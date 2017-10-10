@@ -80,6 +80,21 @@ export interface InitSessionResponse extends EventMessage {
     protocolVersion: string;
 }
 
+export class SubscribeAreaRequest extends RequestMessage {
+    area: string;
+
+    constructor(id: number, area: string) {
+        super(id, 'subscribeArea');
+        this.area = area;
+    }
+}
+
+export interface SubscribeAreaResponse extends ResponseMessage {
+    type: 'areaSubscription';
+    area: string;
+    config: SyncAreaConfig;
+    model: object;
+}
 //---------------- code review stop
 
 /**
@@ -119,14 +134,6 @@ export interface SubscribeAreaError extends ResponseMessage {
     error: string;
 }
 
-export class SubscribeAreaRequest extends RequestMessage {
-    area: string;
-
-    constructor(id: number, area: string) {
-        super(id, 'subscribeArea');
-        this.area = area;
-    }
-}
 export class SignalRequest extends RequestMessage {
     area: string;
     private signal: string;
@@ -149,13 +156,6 @@ export interface SignalError extends ResponseMessage {
     type: 'signalError';
     area: string;
     error: string;
-}
-
-export interface SubscribeAreaResponse extends ResponseMessage {
-    type: 'areaSubscription';
-    area: string;
-    config: SyncAreaConfig;
-    model: object;
 }
 
 export class UnsubscribeAreaRequest extends RequestMessage {

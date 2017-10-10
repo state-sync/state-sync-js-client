@@ -1,10 +1,10 @@
 /**
- * Represent generic store interface, Both Redux and NgRx are compatible
+ * Represent generic store interface. Interface is compatible with both Redux and NgRx.
  */
 export default interface AbstractStore {
     /**
      * Dispatch action
-     * @param action action to dispatch, state-sync specially to not made assumptions on action structure
+     * @param action action to dispatch, state-sync specially to not make any assumptions on action structure
      */
     dispatch(action: any): void;
 

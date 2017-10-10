@@ -16,13 +16,13 @@ import {
     UnsubscribeAreaRequest,
     UnsubscribeAreaResponse
 } from './Events';
+import { InvocationMap } from "./InvocationMap";
 import { ISyncArea } from './ISyncArea';
 import SyncAreaConfig from './SyncAreaConfig';
 import SyncAreaHelper from './SyncAreaHelper';
 import find from './utils/find';
 
 export class SyncArea implements ISyncArea {
-    lastRequestId: number;
     private helper: SyncAreaHelper;
     public name: string;
 
@@ -34,18 +34,16 @@ export class SyncArea implements ISyncArea {
     private shadow: any | null;
     private initialState: any;
     private subscribed: boolean = false;
-    private lastHandledRequest: number;
     private patchQueue: Array<PatchAreaEvent> = [];
     private local: any;
-    private promises: { [p: number]: any } = {};
+    private invocations: InvocationMap;
 
     constructor(name: string, initialState: any, helper: SyncAreaHelper) {
-        this.lastRequestId = 0;
-        this.lastHandledRequest = 0;
         this.initialState = initialState;
         this.helper = helper;
         this.name = name;
         this.subscriptionsCount = 0;
+        this.invocations = new InvocationMap();
     }
 
     public init() {
@@ -71,8 +69,9 @@ export class SyncArea implements ISyncArea {
     private doSubscription() {
         if (!this.subscribed && this.helper.isFullyConnected()) {
             this.subscribed = true;
-            this.lastRequestId++;
-            this.helper.send(new SubscribeAreaRequest(this.lastRequestId, this.name));
+            this.invocations.request(id => {
+                this.helper.send(new SubscribeAreaRequest(id, this.name))
+            });
         }
     }
 
@@ -80,55 +79,42 @@ export class SyncArea implements ISyncArea {
         this.subscriptionsCount--;
         if (this.subscriptionsCount == 0) {
             this.subscribed = false;
-            this.lastRequestId++;
-            this.helper.send(new UnsubscribeAreaRequest(this.lastRequestId, this.name));
+            this.invocations.request(id => {
+                this.helper.send(new UnsubscribeAreaRequest(id, this.name))
+            });
         }
     }
 
     public signal(command: string, parameters?: any): Promise<number> {
-        let rid = this.lastRequestId++;
-        this.helper.send(new SignalRequest(rid, this.name, command, parameters));
-        const promise = new Promise<number>((resolve, reject) => {
-            this.promises[rid] = {resolve: resolve, reject: reject};
-            setTimeout(() => {
-                let p = this.promises[rid];
-                if (p) {
-                    p.reject();
-                    delete this.promises[rid];
-                }
-            }, this.config.commandTimeout);
+        return this.invocations.request(id => {
+            this.helper.send(new SignalRequest(id, this.name, command, parameters));
         });
-        return promise;
     }
 
     public onSignalResponse(event: SignalResponse) {
-        this.lastHandledRequest = event.forId;
-        let p = this.promises[event.forId];
-        if (p) {
-            p.resolve(event.forId);
-            delete this.promises[event.forId];
+        if (this.invocations.response(event.forId)) {
+            this.pushPatches();
         }
     }
 
     public onSignalError(event: SignalError) {
-        this.lastHandledRequest = event.forId;
-        let p = this.promises[event.forId];
-        if (p) {
-            p.reject(event.error);
-            delete this.promises[event.forId];
+        if (this.invocations.error(event.forId, event.error)) {
+            this.pushPatches();
         }
     }
 
     public onSubscribe(event: SubscribeAreaResponse) {
-        this.lastHandledRequest = event.forId;
+        this.invocations.response(event.forId);
         this.config = event.config;
+        this.invocations.timeout = event.config.timeout;
         this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', area: event.area, payload: event.model});
     }
 
     // tslint:disable
     public onUnsubscribe(event: UnsubscribeAreaResponse) {
-        this.lastHandledRequest = event.forId;
+        this.invocations.response(event.forId);
         this.config = new SyncAreaConfig();
+        this.shadow = this.initialState;
         this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', payload: this.initialState});
     }
 
@@ -137,7 +123,12 @@ export class SyncArea implements ISyncArea {
     }
 
     public onPatchResponse(event: PatchAreaResponse) {
-        this.lastHandledRequest = event.forId;
+        if (this.invocations.response(event.forId)) {
+            this.pushPatches();
+        }
+    }
+
+    private pushPatches(): void {
         this.patchQueue.forEach(cmd => {
             this.dispatchSyncPatch(cmd);
         });
@@ -145,7 +136,7 @@ export class SyncArea implements ISyncArea {
     }
 
     public onServerPatch(event: PatchAreaEvent) {
-        if (this.lastHandledRequest === this.lastRequestId) {
+        if (this.invocations.isEmpty()) {
             this.dispatchSyncPatch(event);
         } else {
             this.patchQueue.push(event);
@@ -229,8 +220,9 @@ export class SyncArea implements ISyncArea {
                     ).length > 0);
 
             if (patch.length > 0) {
-                this.lastRequestId++;
-                this.helper.send(new PatchAreaRequest(this.lastRequestId, this.name, patch));
+                this.invocations.request(id => {
+                    this.helper.send(new PatchAreaRequest(id, this.name, patch));
+                });
             }
         }
         return to;
