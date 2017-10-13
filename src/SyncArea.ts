@@ -159,6 +159,14 @@ export class SyncArea implements ISyncArea {
         });
     }
 
+    public actionRemove(path: string) {
+        this.helper.dispatch({
+            type: '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH', area: this.name, payload: [{
+                op: 'remove', path: path
+            }]
+        });
+    }
+
     public actionReduce(path: string, reducer: <T> (state: T) => T): void {
         try {
             let value = find(this.local, path);

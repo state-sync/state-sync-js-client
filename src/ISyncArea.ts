@@ -17,6 +17,12 @@ export interface ISyncArea {
     actionToggle(path: string): void;
 
     /**
+     * Remove value by path
+     * @param {string} path
+     */
+    actionRemove(path: string): void;
+
+    /**
      * Select state part specified by path, modify by given reducer and push changes back to state.
      * As usual changes and synchronized back to server (if configured by server)
      * @param {string} path

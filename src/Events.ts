@@ -168,7 +168,7 @@ export class UnsubscribeAreaRequest extends RequestMessage {
 }
 
 export interface UnsubscribeAreaResponse extends ResponseMessage {
-    type: 'areaUnsubscriptionSuccess';
+    type: 'areaUnsubscription';
     area: string;
 }
 

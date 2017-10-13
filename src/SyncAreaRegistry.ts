@@ -62,7 +62,7 @@ export default class SyncAreaRegistry implements IEventListener {
                 return this.onSubscribeAreaError(event);
             case 'areaSubscription':
                 return this.onSubscribeAreaResponse(event);
-            case 'areaUnsubscriptionSuccess':
+            case 'areaUnsubscription':
                 return this.onUnsubscribeAreaResponse(event);
         }
     }
