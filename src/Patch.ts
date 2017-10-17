@@ -16,14 +16,16 @@ abstract class Op {
 
 class OpReplace extends Op {
     private value: string;
+    private root: boolean;
 
     public constructor(src: PatchOperation) {
         super(src);
+        this.root = src.path === '' || src.path === '/';
         this.value = src.value || '';
     }
 
     public apply(json: any): any {
-        return this.applySegment(json, 0);
+        return this.root ? this.value : this.applySegment(json, 0);
     }
 
     private applySegment(json: any, index: number): any {
@@ -84,7 +86,12 @@ class OpRemove extends Op {
         if (index + 1 < this.path.length) {
             clone[this.path[index]] = this.applySegment(clone[this.path[index]] || {}, index + 1);
         } else {
-            delete clone[this.path[index]];
+            if(clone instanceof Array) {
+                clone.splice(parseInt(this.path[index]), 1);
+            } else {
+                delete clone[this.path[index]];
+            }
+
         }
         return clone;
     }
@@ -104,7 +111,7 @@ export class Patch {
                     this.patches.push(new OpAdd(p));
                     break;
                 case 'remove':
-                    this.patches.push(new OpReplace(p));
+                    this.patches.push(new OpRemove(p));
                     break;
                 default:
                     debugger;
