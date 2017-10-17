@@ -1,6 +1,5 @@
 //import { Promise } from 'es6-promise';
 import * as jiff from 'jiff';
-import * as jsonpatch from 'jsonpatch';
 
 import {
     PatchAreaError,
@@ -21,6 +20,7 @@ import { ISyncArea } from './ISyncArea';
 import SyncAreaConfig from './SyncAreaConfig';
 import SyncAreaHelper from './SyncAreaHelper';
 import find from './utils/find';
+import { Patch } from './Patch';
 
 export class SyncArea implements ISyncArea {
     private helper: SyncAreaHelper;
@@ -197,10 +197,10 @@ export class SyncArea implements ISyncArea {
                     case '@STATE_SYNC/SYNC_AREA_INIT':
                         return this.local = this.shadow = action.payload;
                     case '@STATE_SYNC/SYNC_AREA_SERVER_PATCH':
-                        return this.local = this.shadow = jsonpatch.apply_patch(state, action.payload);
+                        return this.local = this.shadow = new Patch(action.payload).apply(state);
                     case '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH':
                         try {
-                            return this.detectChanges(state, this.local = jsonpatch.apply_patch(state, action.payload));
+                            return this.detectChanges(state, this.local = new Patch(action.payload).apply(state));
                         } catch (e) {
                             console.error('Local patch failed', state, action.payload);
                         }
