@@ -2,8 +2,12 @@ import { ISyncAreaStatus, ISyncConnectionStatus, ISyncStatus } from './ISyncStat
 
 function connectionStatusReducer(state: ISyncConnectionStatus = {status: 'initialized'}, action: any): ISyncConnectionStatus {
     switch (action.type) {
-        case 'CONNECTION_STATUS':
-            return {...state, status: action.status};
+        case '@STATE_SYNC/CONNECTION_STATUS':
+            return action.payload;
+        case '@STATE_SYNC/CONNECTION_STATUS_TICK':
+            return state.status === 'disconnected' ?
+                { status: 'disconnected', reconnectTimeout: state.reconnectTimeout ? state.reconnectTimeout - 1000: 0}
+                : state;
         default:
             return state;
     }
@@ -11,7 +15,7 @@ function connectionStatusReducer(state: ISyncConnectionStatus = {status: 'initia
 
 function areasStatusReducer(state: { [id: string]: ISyncAreaStatus } = {}, action: any) {
     switch (action.type) {
-        case 'SYNC_AREA_STATUS':
+        case '@STATE_SYNC/SYNC_AREA_STATUS':
             let tmp = {...state};
             tmp[action.area] = {id: action.area, status};
             return tmp;

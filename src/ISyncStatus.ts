@@ -4,6 +4,7 @@ export interface ISyncAreaStatus {
 }
 export interface ISyncConnectionStatus {
     status: string;
+    reconnectTimeout?: number;
 }
 
 export interface ISyncStatus{

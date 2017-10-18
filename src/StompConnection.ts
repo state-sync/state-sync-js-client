@@ -5,8 +5,6 @@ import { SyncConfig } from './SyncConfig';
 
 export default class StompConnection {
     private sessionSubscription: Subscription;
-    private userSubscription: Subscription;
-    private userToken: any;
     private rootSubscription: Subscription;
     private sessionToken: string;
     public statusListener: IConnectionStatusListener;
@@ -22,7 +20,7 @@ export default class StompConnection {
         this.statusListener = statusListener;
         this.eventListener = eventListener;
         this.onReady = onReady;
-        this.statusListener.onDisconnect();
+        this.statusListener.onDisconnect(0);
         this.pending = [];
     }
 
@@ -47,7 +45,7 @@ export default class StompConnection {
     public connect() {
         this.statusListener.onConnecting();
         this.stompClient = client(this.config.url, <Options>{debug: this.config.debug});
-        this.stompClient.connect({}, (frame) => this.onStompConnected(frame), () => this.onStompDisconnected());
+        this.stompClient.connect({}, (frame) => this.onStompConnected(frame), (msg:any) => this.onStompDisconnected(msg));
     }
 
     private onStompConnected(frame: any) {
@@ -55,25 +53,20 @@ export default class StompConnection {
         this.statusListener.onConnected();
         this.rootSubscription = this.stompClient.subscribe('/root', (message) => {
             let event = JSON.parse(message.body);
-            this.userToken = event.userToken;
             this.sessionToken = event.sessionToken;
             this.onSystemConnected();
         });
     }
 
-    private onStompDisconnected() {
+    private onStompDisconnected(msg?: CloseEvent) {
         this.fullyConnected = false;
-        this.statusListener.onDisconnect();
+        this.sessionToken = '';
+        this.statusListener.onDisconnect(this.config.timeout);
         setTimeout(() => this.connect(), this.config.timeout);
     }
 
     private onSystemConnected() {
         this.statusListener.onConfigured();
-        this.userSubscription = this.stompClient.subscribe('/account/' + this.userToken, (message) => {
-            let event = JSON.parse(message.body);
-            event.channel = 'user';
-            this.eventListener.onEvent(event);
-        });
         this.sessionSubscription = this.stompClient.subscribe('/session/' + this.sessionToken, (message) => {
             let event = JSON.parse(message.body);
             event.channel = 'session';
@@ -99,7 +92,7 @@ export default class StompConnection {
     private disconnect() {
         this.stompClient.disconnect(() => {
             console.info('stomp client disconnected');
+            this.onStompDisconnected();
         });
-        this.connect();
     }
 }

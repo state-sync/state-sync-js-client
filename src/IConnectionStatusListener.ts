@@ -17,7 +17,7 @@ export interface IConnectionStatusListener {
     /**
      * Invoked on disconnect for any reason
      */
-    onDisconnect(): void;
+    onDisconnect(reconnectTimeout: number): void;
 
     /**
      * Invoked then client connected to server and completely configured on service level,
@@ -41,7 +41,7 @@ export class ConnectionStatusListenerSilent implements IConnectionStatusListener
     public onConnected() {
     }
 
-    public onDisconnect() {
+    public onDisconnect(reconnectTimeout: number) {
     }
 
     public onConfigured() {
@@ -67,30 +67,31 @@ export class ConnectionStatusListenerForStore implements IConnectionStatusListen
      */
     constructor(storeProvider: () => AbstractStore) {
         this.storeProvider = storeProvider;
+        setInterval(() =>
+            this.storeProvider().dispatch({type: '@STATE_SYNC/CONNECTION_STATUS_TICK'}), 1000);
     }
 
-    private dispatchStatus(status: string) {
-        this.storeProvider().dispatch({type: '@STATE_SYNC/CONNECTION_STATUS', status: status});
+    private dispatchStatus(payload: any) {
+        this.storeProvider().dispatch({type: '@STATE_SYNC/CONNECTION_STATUS', payload: payload});
     }
 
     public onReady(): void {
-        this.dispatchStatus('ready');
+        this.dispatchStatus( {status:'ready'});
     }
 
     public onConnecting(): void {
-        this.dispatchStatus('connecting');
+        this.dispatchStatus({status:'connecting'});
     }
 
     public onConnected() {
-        this.dispatchStatus('connected');
+        this.dispatchStatus({status:'connected'});
     }
 
-
-    public onDisconnect() {
-        this.dispatchStatus('disconnected');
+    public onDisconnect(reconnectTimeout: number) {
+        this.dispatchStatus({status:'disconnected', reconnectTimeout: reconnectTimeout});
     }
 
     public onConfigured() {
-        this.dispatchStatus('configured');
+        this.dispatchStatus({status:'configured'});
     }
 }
