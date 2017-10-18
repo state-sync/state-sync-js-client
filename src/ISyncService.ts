@@ -28,7 +28,7 @@ export interface ISyncService {
      * Declare sync status reducer
      * @returns reducer
      */
-    declareStatusArea(): any
+    declareStatusArea(): any;
 
     /**
      * Returns api for declared area

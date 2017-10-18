@@ -1,27 +1,32 @@
-function connectionStatusReducer(state = 'initialized', action: any) {
+import { ISyncAreaStatus, ISyncConnectionStatus, ISyncStatus } from './ISyncStatus';
+
+function connectionStatusReducer(state: ISyncConnectionStatus = {status: 'initialized'}, action: any): ISyncConnectionStatus {
     switch (action.type) {
         case 'CONNECTION_STATUS':
-            return action.status;
+            return {...state, status: action.status};
         default:
             return state;
     }
 }
 
-function areasStatusReducer(state = {}, action: any) {
+function areasStatusReducer(state: { [id: string]: ISyncAreaStatus } = {}, action: any) {
     switch (action.type) {
         case 'SYNC_AREA_STATUS':
-            let t = <any>{...state};
-            t[action.area] = action.status;
-            return t;
+            let tmp = {...state};
+            tmp[action.area] = {id: action.area, status};
+            return tmp;
         default:
             return state;
     }
 }
 
-function StateSyncStatusReducer(state: any, action: any) {
+function StateSyncStatusReducer(state: ISyncStatus = {
+    connection: {status: 'initialized'},
+    areas: {}
+}, action: any): ISyncStatus {
     return {
-        connection: connectionStatusReducer(state, action),
-        areas: areasStatusReducer(state, action)
+        connection: connectionStatusReducer(state.connection, action),
+        areas: areasStatusReducer(state.areas, action)
     }
 }
 

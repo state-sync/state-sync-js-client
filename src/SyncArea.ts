@@ -17,10 +17,10 @@ import {
 } from './Events';
 import { InvocationMap } from "./InvocationMap";
 import { ISyncArea } from './ISyncArea';
+import { Patch } from './Patch';
 import SyncAreaConfig from './SyncAreaConfig';
 import SyncAreaHelper from './SyncAreaHelper';
 import find from './utils/find';
-import { Patch } from './Patch';
 
 export class SyncArea implements ISyncArea {
     private helper: SyncAreaHelper;
@@ -31,12 +31,14 @@ export class SyncArea implements ISyncArea {
      * Configuration retrieved from server in a process of subscription
      */
     private config: SyncAreaConfig;
-    private shadow: any | null;
     private initialState: any;
     private subscribed: boolean = false;
     private patchQueue: Array<PatchAreaEvent> = [];
-    private local: any;
     private invocations: InvocationMap;
+    /**
+     * Local copy of state, updated by reducer, used by actions to get current values
+     */
+    private local: any;
 
     constructor(name: string, initialState: any, helper: SyncAreaHelper) {
         this.initialState = initialState;
@@ -114,7 +116,6 @@ export class SyncArea implements ISyncArea {
     public onUnsubscribe(event: UnsubscribeAreaResponse) {
         this.invocations.response(event.forId);
         this.config = new SyncAreaConfig();
-        this.shadow = this.initialState;
         this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', payload: this.initialState});
     }
 
@@ -189,15 +190,15 @@ export class SyncArea implements ISyncArea {
         // initialization
         if (state === undefined) return this.initialState;
 
-        //sync
+        // sync
         try {
             const fit = (this.name === action.area) && action.type.indexOf('@STATE_SYNC/') === 0;
             if (fit) {
                 switch (action.type) {
                     case '@STATE_SYNC/SYNC_AREA_INIT':
-                        return this.local = this.shadow = action.payload;
+                        return this.local = action.payload;
                     case '@STATE_SYNC/SYNC_AREA_SERVER_PATCH':
-                        return this.local = this.shadow = new Patch(action.payload).apply(state);
+                        return this.local = new Patch(action.payload).apply(state);
                     case '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH':
                         try {
                             return this.detectChanges(state, this.local = new Patch(action.payload).apply(state));
@@ -216,6 +217,10 @@ export class SyncArea implements ISyncArea {
 
     private detectChanges(from: any, to: any) {
         if (this.config) {
+            // if state is the same - skip detection.
+            if (to === from) {
+                return to;
+            }
             let patch = jiff.diff(from, to);
             let roots = this.config.clientPush;
             let prefix = '/' + this.config.clientLocalPrefix;
