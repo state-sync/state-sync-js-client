@@ -55,4 +55,11 @@ export interface ISyncArea {
      * @returns {any}
      */
     model(): any;
+
+    /**
+     * Select model by path
+     * @param {string} path
+     * @returns {any}
+     */
+    select(path: string): any;
 }

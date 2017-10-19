@@ -4,7 +4,7 @@ export interface PatchOperation {
     value?: string;
 }
 
-abstract class Op {
+export abstract class Op {
     path: string[];
 
     public constructor(src: PatchOperation) {
@@ -36,6 +36,25 @@ class OpReplace extends Op {
             clone[this.path[index]] = this.value;
         }
         return clone;
+    }
+}
+
+export class OpSelect extends Op {
+    private value: string;
+    private root: boolean;
+
+    public constructor(src: PatchOperation) {
+        super(src);
+        this.root = src.path === '' || src.path === '/';
+        this.value = src.value || '';
+    }
+
+    public apply(json: any): any {
+        return this.root ? this.value : this.applySegment(json, 0);
+    }
+
+    private applySegment(json: any, index: number): any {
+        return json ? (index < this.path.length ? this.applySegment(json[this.path[index]], index+1) : json) : null;
     }
 }
 

@@ -1,23 +1,10 @@
 //import { Promise } from 'es6-promise';
 import * as jiff from 'jiff';
 
-import {
-    PatchAreaError,
-    PatchAreaEvent,
-    PatchAreaRequest,
-    PatchAreaResponse,
-    SignalError,
-    SignalRequest,
-    SignalResponse,
-    SubscribeAreaError,
-    SubscribeAreaRequest,
-    SubscribeAreaResponse,
-    UnsubscribeAreaRequest,
-    UnsubscribeAreaResponse
-} from './Events';
+import { PatchAreaError, PatchAreaEvent, PatchAreaRequest, PatchAreaResponse, SignalError, SignalRequest, SignalResponse, SubscribeAreaError, SubscribeAreaRequest, SubscribeAreaResponse, UnsubscribeAreaRequest, UnsubscribeAreaResponse } from './Events';
 import { InvocationMap } from "./InvocationMap";
 import { ISyncArea } from './ISyncArea';
-import { Patch } from './Patch';
+import { OpSelect, Patch } from './Patch';
 import SyncAreaConfig from './SyncAreaConfig';
 import SyncAreaHelper from './SyncAreaHelper';
 import find from './utils/find';
@@ -55,9 +42,15 @@ export class SyncArea implements ISyncArea {
     public wrap(reducer: any): any {
         return (state: any, action: any, ext: any) => this.reduce(state, action, ext, reducer);
     }
-    public model() : any {
+
+    public model(): any {
         return this.local;
     }
+
+    select(path: string) {
+        return new OpSelect({op:'select', path:path}).apply(this.local);
+    }
+
     /**
      * Invoke when connection is ready
      */
