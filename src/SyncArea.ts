@@ -55,7 +55,9 @@ export class SyncArea implements ISyncArea {
     public wrap(reducer: any): any {
         return (state: any, action: any, ext: any) => this.reduce(state, action, ext, reducer);
     }
-
+    public model() : any {
+        return this.local;
+    }
     /**
      * Invoke when connection is ready
      */

@@ -49,4 +49,10 @@ export interface ISyncArea {
      * @returns {Promise}
      */
     signal(command: string, parameters?: any): Promise<number>;
+
+    /**
+     * Expose area model. Do not modify model in your code
+     * @returns {any}
+     */
+    model(): any;
 }
