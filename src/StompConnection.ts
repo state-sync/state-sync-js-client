@@ -1,4 +1,4 @@
-import { Client, client, Options, Subscription } from 'webstomp-client';
+import { Client, client, Frame, Options, Subscription } from 'webstomp-client';
 import { IConnectionStatusListener } from './IConnectionStatusListener';
 import { IEventListener } from './IEventListener';
 import { SyncConfig } from './SyncConfig';
@@ -58,11 +58,15 @@ export default class StompConnection {
         });
     }
 
-    private onStompDisconnected(msg?: CloseEvent) {
+    private onStompDisconnected(msg?: any) {
         this.fullyConnected = false;
         this.sessionToken = '';
         this.statusListener.onDisconnect(this.config.timeout);
-        setTimeout(() => this.connect(), this.config.timeout);
+        if(msg && msg.command === 'ERROR') {
+            this.config.authListener.onAuthRequired('');
+        } else {
+            setTimeout(() => this.connect(), this.config.timeout);
+        }
     }
 
     private onSystemConnected() {

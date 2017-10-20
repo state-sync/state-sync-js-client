@@ -1,8 +1,11 @@
+import { ISyncAuthListener } from './ISyncAuthListener';
+
 export class SyncConfig {
     public url: string;
     debug: boolean;
     timeout: number;
     debugConnectFrame: boolean;
+    authListener: ISyncAuthListener;
 
     constructor() {
         this.debug = false;
