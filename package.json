@@ -1,6 +1,6 @@
 {
   "name": "@state-sync/js-client",
-  "version": "0.0.49",
+  "version": "0.0.50",
   "description": "state-sync client",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -28,8 +28,10 @@
     "tsdoc": "node ./node_modules/typedoc/bin/typedoc --out tsdoc"
   },
   "dependencies": {
+    "@types/uuid": "^3.4.3",
     "jiff": "^0.7.3",
     "jsonpatch": "^3.0.1",
+    "uuid": "^3.1.0",
     "webstomp-client": "^1.0.8"
   }
 }

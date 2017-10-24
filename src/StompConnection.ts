@@ -2,10 +2,10 @@ import { Client, client, Frame, Options, Subscription } from 'webstomp-client';
 import { IConnectionStatusListener } from './IConnectionStatusListener';
 import { IEventListener } from './IEventListener';
 import { SyncConfig } from './SyncConfig';
+import * as uuid from 'uuid';
 
 export default class StompConnection {
     private sessionSubscription: Subscription;
-    private rootSubscription: Subscription;
     private sessionToken: string;
     public statusListener: IConnectionStatusListener;
     private eventListener: IEventListener;
@@ -28,7 +28,7 @@ export default class StompConnection {
         let msg = JSON.stringify(event);
         try {
             if(this.stompClient) {
-                this.stompClient.send('/session/' + this.sessionToken, msg);
+                this.stompClient.send('/app/request/' + this.sessionToken, msg);
             } else {
                 this.pending.push(event);
             }
@@ -44,6 +44,7 @@ export default class StompConnection {
 
     public connect() {
         this.statusListener.onConnecting();
+        this.sessionToken = uuid.v4();
         this.stompClient = client(this.config.url, <Options>{debug: this.config.debug});
         this.stompClient.connect({}, (frame) => this.onStompConnected(frame), (msg:any) => this.onStompDisconnected(msg));
     }
@@ -51,11 +52,9 @@ export default class StompConnection {
     private onStompConnected(frame: any) {
         if (this.config.debugConnectFrame) console.info(frame);
         this.statusListener.onConnected();
-        this.rootSubscription = this.stompClient.subscribe('/root', (message) => {
-            let event = JSON.parse(message.body);
-            this.sessionToken = event.sessionToken;
-            this.onSystemConnected();
-        });
+        // this.sessionToken = frame.header;
+        this.stompClient.send('/app/init/'+this.sessionToken);
+        this.onSystemConnected();
     }
 
     private onStompDisconnected(msg?: any) {
@@ -71,9 +70,8 @@ export default class StompConnection {
 
     private onSystemConnected() {
         this.statusListener.onConfigured();
-        this.sessionSubscription = this.stompClient.subscribe('/session/' + this.sessionToken, (message) => {
+        this.sessionSubscription = this.stompClient.subscribe('/out/' + this.sessionToken, (message) => {
             let event = JSON.parse(message.body);
-            event.channel = 'session';
             this.eventListener.onEvent(event);
             this.onSessionChannelConnected();
         });
