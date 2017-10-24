@@ -17,6 +17,7 @@ export default class StompConnection {
 
     public constructor(config: SyncConfig, statusListener: IConnectionStatusListener, eventListener: IEventListener, onReady: () => any) {
         this.config = config;
+        this.sessionToken = uuid.v4();
         this.statusListener = statusListener;
         this.eventListener = eventListener;
         this.onReady = onReady;
@@ -44,7 +45,6 @@ export default class StompConnection {
 
     public connect() {
         this.statusListener.onConnecting();
-        this.sessionToken = uuid.v4();
         if (this.config.csrfUrl) {
             var xhttp = new XMLHttpRequest();
             // xhttp.onreadystatechange = (body) => this.wsConnect();
