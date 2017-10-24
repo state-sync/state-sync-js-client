@@ -1,8 +1,8 @@
-import { Client, client, Frame, Options, Subscription } from 'webstomp-client';
+import * as uuid from 'uuid';
+import { Client, client, Options, Subscription } from 'webstomp-client';
 import { IConnectionStatusListener } from './IConnectionStatusListener';
 import { IEventListener } from './IEventListener';
 import { SyncConfig } from './SyncConfig';
-import * as uuid from 'uuid';
 
 export default class StompConnection {
     private sessionSubscription: Subscription;
@@ -27,13 +27,13 @@ export default class StompConnection {
     public send(event: object) {
         let msg = JSON.stringify(event);
         try {
-            if(this.stompClient) {
+            if (this.stompClient) {
                 this.stompClient.send('/app/request/' + this.sessionToken, msg);
             } else {
                 this.pending.push(event);
             }
         } catch (err) {
-            if(err.name == 'InvalidStateError') {
+            if (err.name == 'InvalidStateError') {
                 this.pending.push(event);
             } else {
                 console.log('StompConnection.send failed, reconnect', msg);
@@ -45,15 +45,33 @@ export default class StompConnection {
     public connect() {
         this.statusListener.onConnecting();
         this.sessionToken = uuid.v4();
+        if (this.config.csrfUrl) {
+            var xhttp = new XMLHttpRequest();
+            // xhttp.onreadystatechange = (body) => this.wsConnect();
+            // xhttp.onerror = () => this.onStompDisconnected();
+            xhttp.open("GET", this.config.csrfUrl, false);
+            xhttp.send();
+            let csrfToken = xhttp.responseText;
+            this.wsConnect(csrfToken);
+        } else {
+            this.wsConnect();
+        }
+    }
+
+    private wsConnect(csrfToken?: string) {
+        let headers: { [key:string]:string; } = {};
+        if(csrfToken) {
+            headers['X-CSRF-TOKEN'] = csrfToken;
+        }
         this.stompClient = client(this.config.url, <Options>{debug: this.config.debug});
-        this.stompClient.connect({}, (frame) => this.onStompConnected(frame), (msg:any) => this.onStompDisconnected(msg));
+        this.stompClient.connect(headers, (frame) => this.onStompConnected(frame), (msg: any) => this.onStompDisconnected(msg));
     }
 
     private onStompConnected(frame: any) {
         if (this.config.debugConnectFrame) console.info(frame);
         this.statusListener.onConnected();
         // this.sessionToken = frame.header;
-        this.stompClient.send('/app/init/'+this.sessionToken);
+        this.stompClient.send('/app/init/' + this.sessionToken);
         this.onSystemConnected();
     }
 
@@ -61,7 +79,7 @@ export default class StompConnection {
         this.fullyConnected = false;
         this.sessionToken = '';
         this.statusListener.onDisconnect(this.config.timeout);
-        if(msg && msg.command === 'ERROR') {
+        if (msg && msg.command === 'ERROR') {
             this.config.authListener.onAuthRequired('');
         } else {
             setTimeout(() => this.connect(), this.config.timeout);
@@ -85,7 +103,7 @@ export default class StompConnection {
     }
 
     private onSessionChannelConnected() {
-        for(let event of this.pending) {
+        for (let event of this.pending) {
             this.send(event);
         }
         this.pending = [];
