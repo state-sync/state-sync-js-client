@@ -76,6 +76,7 @@ export default class StompConnection {
     }
 
     private onStompDisconnected(msg?: any) {
+        debugger;
         this.fullyConnected = false;
         this.sessionToken = '';
         this.statusListener.onDisconnect(this.config.timeout);

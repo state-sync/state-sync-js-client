@@ -58,17 +58,19 @@ export class SyncArea implements ISyncArea {
         this.doSubscription();
     }
 
-    public subscribe() {
+    public subscribe(): Promise<number> {
         this.subscriptionsCount++;
-        this.doSubscription();
+        return this.doSubscription();
     }
 
-    private doSubscription() {
+    private doSubscription(): Promise<number> {
         if (!this.subscribed && this.helper.isFullyConnected()) {
             this.subscribed = true;
-            this.invocations.request(id => {
+            return this.invocations.request(id => {
                 this.helper.send(new SubscribeAreaRequest(id, this.name))
             });
+        } else {
+            return new Promise((resolve, error) => resolve(0));
         }
     }
 

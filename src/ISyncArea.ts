@@ -33,7 +33,7 @@ export interface ISyncArea {
     /**
      * Subscribe to synchronization, repeat call of this method increment refs counter.
      */
-    subscribe(): void;
+    subscribe(): Promise<number>;
 
     /**
      * Unsubscribe area from synchronization. Decrement refs counter.
