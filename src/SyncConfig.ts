@@ -7,6 +7,8 @@ export class SyncConfig {
     debugConnectFrame: boolean;
     authListener: ISyncAuthListener;
     csrfUrl?: string;
+    checkTokenUrl?: string;
+    accessToken: string;
     constructor() {
         this.debug = false;
         this.timeout = 5000;
