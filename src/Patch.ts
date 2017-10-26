@@ -15,13 +15,13 @@ export abstract class Op {
 }
 
 class OpReplace extends Op {
-    private value: string;
+    private value?: any;
     private root: boolean;
 
     public constructor(src: PatchOperation) {
         super(src);
         this.root = src.path === '' || src.path === '/';
-        this.value = src.value || '';
+        this.value = src.value;
     }
 
     public apply(json: any): any {
@@ -40,17 +40,15 @@ class OpReplace extends Op {
 }
 
 export class OpSelect extends Op {
-    private value: string;
     private root: boolean;
 
     public constructor(src: PatchOperation) {
         super(src);
         this.root = src.path === '' || src.path === '/';
-        this.value = src.value || '';
     }
 
     public apply(json: any): any {
-        return this.root ? this.value : this.applySegment(json, 0);
+        return this.root ? json : this.applySegment(json, 0);
     }
 
     private applySegment(json: any, index: number): any {
@@ -59,11 +57,11 @@ export class OpSelect extends Op {
 }
 
 class OpAdd extends Op {
-    private value: string;
+    private value?: any;
 
     public constructor(src: PatchOperation) {
         super(src);
-        this.value = src.value || '';
+        this.value = src.value;
     }
 
     public apply(json: any): any {
