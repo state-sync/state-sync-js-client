@@ -26,6 +26,8 @@ export class SyncArea implements ISyncArea {
      * Local copy of state, updated by reducer, used by actions to get current values
      */
     private local: any;
+    private ready: boolean;
+    private modelVersion: number;
 
     constructor(name: string, initialState: any, helper: SyncAreaHelper) {
         this.initialState = initialState;
@@ -33,10 +35,16 @@ export class SyncArea implements ISyncArea {
         this.name = name;
         this.subscriptionsCount = 0;
         this.invocations = new InvocationMap();
+        this.ready = false;
+        this.modelVersion = 0;
+    }
+
+    isReady(): boolean {
+        return this.ready;
     }
 
     public init() {
-
+        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_STATUS', area: this.name, status: 'disconnected', ready: false});
     }
 
     public wrap(reducer: any): any {
@@ -48,7 +56,7 @@ export class SyncArea implements ISyncArea {
     }
 
     select(path: string) {
-        return new OpSelect({op:'select', path:path}).apply(this.local);
+        return new OpSelect({op: 'select', path: path}).apply(this.local);
     }
 
     /**
@@ -103,16 +111,20 @@ export class SyncArea implements ISyncArea {
     }
 
     public onSubscribe(event: SubscribeAreaResponse) {
+        this.ready = true;
         this.invocations.response(event.forId);
         this.config = event.config;
         this.invocations.timeout = event.config.timeout;
         this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', area: event.area, payload: event.model});
+        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_STATUS', area: event.area, status: 'ready', ready: true});
     }
 
     // tslint:disable
     public onUnsubscribe(event: UnsubscribeAreaResponse) {
+        this.ready = false;
         this.invocations.response(event.forId);
         this.config = new SyncAreaConfig();
+        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_STATUS', area: event.area, status: 'disconnected', ready: false});
         this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_INIT', payload: this.initialState});
     }
 
@@ -193,9 +205,13 @@ export class SyncArea implements ISyncArea {
             if (fit) {
                 switch (action.type) {
                     case '@STATE_SYNC/SYNC_AREA_INIT':
-                        return this.local = action.payload;
+                        this.local = action.payload;
+                        this.local.$$version$$ = this.modelVersion++;
+                        return this.local;
                     case '@STATE_SYNC/SYNC_AREA_SERVER_PATCH':
-                        return this.local = new Patch(action.payload).apply(state);
+                        this.local = new Patch(action.payload).apply(state);
+                        this.local.$$version$$ = this.modelVersion++;
+                        return this.local;
                     case '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH':
                         try {
                             return this.detectChanges(state, this.local = new Patch(action.payload).apply(state));

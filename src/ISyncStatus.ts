@@ -1,6 +1,7 @@
 export interface ISyncAreaStatus {
     id: string;
     status: string;
+    ready: boolean;
 }
 export interface ISyncConnectionStatus {
     status: string;

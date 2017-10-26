@@ -62,4 +62,10 @@ export interface ISyncArea {
      * @returns {any}
      */
     select(path: string): any;
+
+    /**
+     * Area fully initialized from server and ready to use in UI
+     * @returns {boolean}
+     */
+    isReady(): boolean;
 }

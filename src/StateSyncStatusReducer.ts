@@ -6,18 +6,19 @@ function connectionStatusReducer(state: ISyncConnectionStatus = {status: 'initia
             return action.payload;
         case '@STATE_SYNC/CONNECTION_STATUS_TICK':
             return state.status === 'disconnected' ?
-                { status: 'disconnected', reconnectTimeout: state.reconnectTimeout ? state.reconnectTimeout - 1000: 0}
+                {status: 'disconnected', reconnectTimeout: state.reconnectTimeout ? state.reconnectTimeout - 1000 : 0}
                 : state;
         default:
             return state;
     }
 }
 
-function areasStatusReducer(state: { [id: string]: ISyncAreaStatus } = {}, action: any) {
+function areasStatusReducer(state: { [id: string]: ISyncAreaStatus } = {}, action: any): { [id: string]: ISyncAreaStatus } {
     switch (action.type) {
         case '@STATE_SYNC/SYNC_AREA_STATUS':
+            let st: ISyncAreaStatus = {id: action.area, status: action.status, ready: action.ready};
             let tmp = {...state};
-            tmp[action.area] = {id: action.area, status};
+            tmp[action.area] = st;
             return tmp;
         default:
             return state;
