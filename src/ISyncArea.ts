@@ -28,7 +28,7 @@ export interface ISyncArea {
      * @param {string} path
      * @param {<T>(state: T) => T} reducer
      */
-    actionReduce(path: string, reducer: <T> (state: T) => T): void;
+    actionReduce<T>(path: string, reducer: (state: T) => T): void;
 
     /**
      * Subscribe to synchronization, repeat call of this method increment refs counter.

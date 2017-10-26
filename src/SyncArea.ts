@@ -177,7 +177,7 @@ export class SyncArea implements ISyncArea {
         });
     }
 
-    public actionReduce(path: string, reducer: <T> (state: T) => T): void {
+    public actionReduce<T>(path: string, reducer: (state: T) => T): void {
         try {
             let value = find(this.local, path);
             this.actionReplace(path, reducer(value));
