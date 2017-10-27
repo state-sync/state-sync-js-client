@@ -48,11 +48,11 @@ export class OpSelect extends Op {
     }
 
     public apply(json: any): any {
-        return this.root ? json : this.applySegment(json, 0);
-    }
-
-    private applySegment(json: any, index: number): any {
-        return json ? (index < this.path.length ? this.applySegment(json[this.path[index]], index+1) : json) : null;
+        const p = this.path;
+        for(let i=0; i< p.length;i++) {
+            json = json ? json[p[i]] : null;
+        }
+        return json;
     }
 }
 

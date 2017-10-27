@@ -206,11 +206,11 @@ export class SyncArea implements ISyncArea {
                 switch (action.type) {
                     case '@STATE_SYNC/SYNC_AREA_INIT':
                         this.local = action.payload;
-                        this.local.$$version$$ = this.modelVersion++;
+                        this.local.syncStateLastUpdateVersion = this.modelVersion++;
                         return this.local;
                     case '@STATE_SYNC/SYNC_AREA_SERVER_PATCH':
                         this.local = new Patch(action.payload).apply(state);
-                        this.local.$$version$$ = this.modelVersion++;
+                        this.local.syncStateLastUpdateVersion = this.modelVersion++;
                         return this.local;
                     case '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH':
                         try {
