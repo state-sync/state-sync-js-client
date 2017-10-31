@@ -79,32 +79,33 @@ export default class StompConnection {
         this.fullyConnected = false;
         this.sessionToken = '';
         this.statusListener.onDisconnect(this.config.timeout);
-        if (this.config.checkTokenUrl) {
-            // check access token
-            let xhttp = new XMLHttpRequest();
-            xhttp.onload = (ev) => {
-                if(xhttp.readyState === 4) {
-                    const json = JSON.parse(xhttp.responseText);
-                    if (json.error) {
-                        this.config.authListener.onAuthRequired('');
-                    } else {
-                        setTimeout(() => this.connect(), this.config.timeout);
-                    }
-                }
-            };
-            xhttp.onerror = (ev) => {
-                console.info(ev);
-                setTimeout(() => this.connect(), this.config.timeout);
-            };
-            xhttp.open('GET', this.config.checkTokenUrl + '/' + this.config.accessToken, true);
-            xhttp.send();
-        } else {
-            if (msg && msg.command === 'ERROR') {
-                this.config.authListener.onAuthRequired('');
-            } else {
-                setTimeout(() => this.connect(), this.config.timeout);
-            }
-        }
+        this.config.authListener.onAuthRequired('');
+        // if (this.config.checkTokenUrl) {
+        //     // check access token
+        //     let xhttp = new XMLHttpRequest();
+        //     xhttp.onload = (ev) => {
+        //         if(xhttp.readyState === 4) {
+        //             const json = JSON.parse(xhttp.responseText);
+        //             if (json.error) {
+        //                 this.config.authListener.onAuthRequired('');
+        //             } else {
+        //                 setTimeout(() => this.connect(), this.config.timeout);
+        //             }
+        //         }
+        //     };
+        //     xhttp.onerror = (ev) => {
+        //         console.info(ev);
+        //         setTimeout(() => this.connect(), this.config.timeout);
+        //     };
+        //     xhttp.open('GET', this.config.checkTokenUrl + '/' + this.config.accessToken, true);
+        //     xhttp.send();
+        // } else {
+        //     if (msg && msg.command === 'ERROR') {
+        //         this.config.authListener.onAuthRequired('');
+        //     } else {
+        //         setTimeout(() => this.connect(), this.config.timeout);
+        //     }
+        // }
     }
 
     private onSystemConnected() {
