@@ -2,6 +2,7 @@ export interface PatchOperation {
     op: string;
     path: string;
     value?: string;
+    from?: string;
 }
 
 export abstract class Op {
@@ -25,6 +26,33 @@ class OpReplace extends Op {
     }
 
     public apply(json: any): any {
+        return this.root ? this.value : this.applySegment(json, 0);
+    }
+
+    private applySegment(json: any, index: number): any {
+        let clone = json instanceof Array ? [...json] : {...json};
+        if (index + 1 < this.path.length) {
+            clone[this.path[index]] = this.applySegment(clone[this.path[index]] || {}, index + 1);
+        } else {
+            clone[this.path[index]] = this.value;
+        }
+        return clone;
+    }
+}
+
+class OpCopy extends Op {
+    private value?: any;
+    private root: boolean;
+    private from: OpSelect;
+
+    public constructor(src: PatchOperation) {
+        super(src);
+        this.root = src.path === '' || src.path === '/';
+        this.from = new OpSelect({op: 'select', path: src.from || '/'});
+    }
+
+    public apply(json: any): any {
+        this.value = JSON.parse(JSON.stringify(this.from.apply(json)));
         return this.root ? this.value : this.applySegment(json, 0);
     }
 
@@ -129,6 +157,9 @@ export class Patch {
                     break;
                 case 'remove':
                     this.patches.push(new OpRemove(p));
+                    break;
+                case 'copy':
+                    this.patches.push(new OpCopy(p));
                     break;
                 default:
                     debugger;
