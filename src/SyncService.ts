@@ -41,11 +41,13 @@ class SyncService implements ISyncService, SyncAreaHelper {
         this.store = store;
         this.areas.forEach((area) => area.init());
         if (!this.connection) {
-            if (!this.connectionStatusListener) {
-                this.connectionStatusListener = new ConnectionStatusListenerSilent();
+            if(config) {
+                if (!this.connectionStatusListener) {
+                    this.connectionStatusListener = new ConnectionStatusListenerSilent();
+                }
+                this.connection = new StompConnection(this.config, this.connectionStatusListener, this.areas, () => this.onReady());
+                this.connection.connect();
             }
-            this.connection = new StompConnection(this.config, this.connectionStatusListener, this.areas, () => this.onReady());
-            this.connection.connect();
         }
     }
 

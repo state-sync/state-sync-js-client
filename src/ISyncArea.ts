@@ -23,6 +23,29 @@ export interface ISyncArea {
     actionRemove(path: string): void;
 
     /**
+     * Insert new item into array and sort
+     * @param {string} path
+     * @param item
+     * @param {string} keyField
+     */
+    actionArrayInsert(path: string, item: any, keyField: string): void;
+
+    /**
+     * Remove array element by key field
+     * @param {string} path
+     * @param {string} keyField
+     * @param value
+     */
+    actionArrayRemoveByKey(path: string, keyField: string, value: any): void;
+
+    /**
+     * Remove array element by index
+     * @param {string} path
+     * @param {number} index
+     */
+    actionArrayRemoveByIndex(path: string, index: number): void;
+
+    /**
      * Select state part specified by path, modify by given reducer and push changes back to state.
      * As usual changes and synchronized back to server (if configured by server)
      * @param {string} path

@@ -161,6 +161,43 @@ export class SyncArea implements ISyncArea {
         console.error(event);
     }
 
+    public actionArrayInsert(path: string, item: any, keyField: string): void {
+        this.actionReduce(path, (array: any[]) => {
+            if(array) {
+                let tmp = [...array, item];
+                tmp.sort( (a, b) => {
+                    const ak = a[keyField];
+                    const bk = b[keyField];
+                    if (ak < bk) {
+                        return -1;
+                    }
+                    if (ak > bk) {
+                        return 1;
+                    }
+                    return 0;
+                });
+                return tmp;
+            } else
+            {
+                return [item];
+            }
+        });
+    }
+
+    public actionArrayRemoveByKey(path: string, keyField: string, value: any): void {
+        this.actionReduce(path, (array: any[]) => {
+            let tmp = [...array];
+            tmp.filter( item => item[keyField] == value);
+            return tmp;
+        });
+    }
+
+    public actionArrayRemoveByIndex(path: string, index: number): void {
+        this.actionReduce(path, (array: any[]) => {
+            return array.splice(index, 1);
+        });
+    }
+
     public actionReplace(path: string, value: any) {
         this.helper.dispatch({
             type: '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH', area: this.name, payload: [{
