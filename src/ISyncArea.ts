@@ -19,8 +19,9 @@ export interface ISyncArea {
     /**
      * Remove value by path
      * @param {string} path
+     * @param {(item:any) => boolean)} condition - optional remove condition
      */
-    actionRemove(path: string): void;
+    actionRemove(path: string, condition?: (item:any) => boolean): void;
 
     /**
      * Insert new item into array and sort
@@ -28,7 +29,15 @@ export interface ISyncArea {
      * @param item
      * @param {string} keyField
      */
-    actionArrayInsert(path: string, item: any, keyField: string): void;
+    actionArrayInsertByKey(path: string, item: any, keyField: string): void;
+
+    /**
+     * Replace array item by key
+     * @param {string} path
+     * @param item
+     * @param {string} keyField
+     */
+    actionArrayReplaceByKey(path: string, item: any, keyField: string): void;
 
     /**
      * Remove array element by key field

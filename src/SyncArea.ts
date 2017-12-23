@@ -161,11 +161,11 @@ export class SyncArea implements ISyncArea {
         console.error(event);
     }
 
-    public actionArrayInsert(path: string, item: any, keyField: string): void {
+    public actionArrayInsertByKey(path: string, item: any, keyField: string): void {
         this.actionReduce(path, (array: any[]) => {
-            if(array) {
+            if (array) {
                 let tmp = [...array, item];
-                tmp.sort( (a, b) => {
+                tmp.sort((a, b) => {
                     const ak = a[keyField];
                     const bk = b[keyField];
                     if (ak < bk) {
@@ -177,17 +177,30 @@ export class SyncArea implements ISyncArea {
                     return 0;
                 });
                 return tmp;
-            } else
-            {
+            } else {
                 return [item];
             }
         });
     }
 
+    public actionArrayReplaceByKey(path: string, data: any, keyField: string): void {
+        this.actionReduce(path, (array: any[]) => {
+            let copy = [...array];
+            for (let i = 0; i < copy.length; i++) {
+                let item = copy[i];
+                if (item[keyField] === data[keyField]) {
+                    copy[i] = item;
+                }
+            }
+            return copy;
+        });
+
+    }
+
     public actionArrayRemoveByKey(path: string, keyField: string, value: any): void {
         this.actionReduce(path, (array: any[]) => {
             let tmp = [...array];
-            tmp.filter( item => item[keyField] == value);
+            tmp.filter(item => item[keyField] == value);
             return tmp;
         });
     }
@@ -206,12 +219,19 @@ export class SyncArea implements ISyncArea {
         });
     }
 
-    public actionRemove(path: string) {
-        this.helper.dispatch({
-            type: '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH', area: this.name, payload: [{
-                op: 'remove', path: path
-            }]
-        });
+    public actionRemove(path: string, condition?: (item:any) => boolean): void {
+        try {
+            let value = find(this.local, path);
+            if(!condition || condition(value)) {
+                this.helper.dispatch({
+                    type: '@STATE_SYNC/SYNC_AREA_LOCAL_PATCH', area: this.name, payload: [{
+                        op: 'remove', path: path
+                    }]
+                });
+            }
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     public actionReduce<T>(path: string, reducer: (state: T) => T): void {
