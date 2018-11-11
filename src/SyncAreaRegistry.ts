@@ -33,7 +33,11 @@ export default class SyncAreaRegistry implements IEventListener {
 
     public forEach(callback: (area: SyncArea) => any): void {
         for (var key in this.areas) {
-            callback(this.areas[key]);
+            try {
+                callback(this.areas[key]);
+            } catch(e) {
+                console.info(`Area ${key} is initialized`);
+            }
         }
     }
 

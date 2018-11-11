@@ -29,11 +29,17 @@ export default class StompConnection {
         let msg = JSON.stringify(event);
         try {
             if (this.stompClient) {
-                this.stompClient.send('/app/request/' + this.sessionToken, msg);
+                const point = '/app/request/' + this.sessionToken;
+                if (this.config.debug) {
+                    console.info(`send to: ${point}`)
+                }
+                this.stompClient.send(point, msg);
             } else {
+                console.info(`pending event`);
                 this.pending.push(event);
             }
         } catch (err) {
+            console.error('error:' + err);
             if (err.name == 'InvalidStateError') {
                 this.pending.push(event);
             } else {
@@ -52,8 +58,10 @@ export default class StompConnection {
             xhttp.open("GET", this.config.csrfUrl, false);
             xhttp.send();
             let csrfToken = xhttp.responseText;
+            console.info(`wsConnect csrfToken`);
             this.wsConnect(csrfToken);
         } else {
+            console.info(`wsConnect`);
             this.wsConnect();
         }
     }
@@ -63,7 +71,9 @@ export default class StompConnection {
         if (csrfToken) {
             headers['X-CSRF-TOKEN'] = csrfToken;
         }
-        this.stompClient = client(this.config.url + '?access_token=' + this.config.accessToken, <Options>{debug: this.config.debug});
+        let url = this.config.url + '?access_token=' + this.config.accessToken;
+        console.info(`wsConnect url=${url}`);
+        this.stompClient = client(url, <Options>{debug: this.config.debug});
         this.stompClient.connect(headers, (frame) => this.onStompConnected(frame), (msg: any) => this.onStompDisconnected(msg));
     }
 
@@ -71,7 +81,9 @@ export default class StompConnection {
         if (this.config.debugConnectFrame) console.info(frame);
         this.statusListener.onConnected();
         // this.sessionToken = frame.header;
-        this.stompClient.send('/app/init/' + this.sessionToken);
+        let url = '/app/init/' + this.sessionToken;
+        console.info(`onStompConnected frame=${frame} url=${url}`);
+        this.stompClient.send(url);
         this.onSystemConnected();
     }
 
@@ -80,32 +92,6 @@ export default class StompConnection {
         this.sessionToken = '';
         this.statusListener.onDisconnect(this.config.timeout);
         this.config.authListener.onAuthRequired('');
-        // if (this.config.checkTokenUrl) {
-        //     // check access token
-        //     let xhttp = new XMLHttpRequest();
-        //     xhttp.onload = (ev) => {
-        //         if(xhttp.readyState === 4) {
-        //             const json = JSON.parse(xhttp.responseText);
-        //             if (json.error) {
-        //                 this.config.authListener.onAuthRequired('');
-        //             } else {
-        //                 setTimeout(() => this.connect(), this.config.timeout);
-        //             }
-        //         }
-        //     };
-        //     xhttp.onerror = (ev) => {
-        //         console.info(ev);
-        //         setTimeout(() => this.connect(), this.config.timeout);
-        //     };
-        //     xhttp.open('GET', this.config.checkTokenUrl + '/' + this.config.accessToken, true);
-        //     xhttp.send();
-        // } else {
-        //     if (msg && msg.command === 'ERROR') {
-        //         this.config.authListener.onAuthRequired('');
-        //     } else {
-        //         setTimeout(() => this.connect(), this.config.timeout);
-        //     }
-        // }
     }
 
     private onSystemConnected() {
