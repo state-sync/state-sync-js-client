@@ -73,7 +73,7 @@ export default class StompConnection {
         }
         let url = this.config.url + '?access_token=' + this.config.accessToken;
         console.info(`wsConnect url=${url}`);
-        this.stompClient = client(url, <Options>{debug: this.config.debug});
+        this.stompClient = client(url, <Options>{debug: this.config.debug, protocols:['v12.stomp', 'v11.stomp', 'v10.stomp']});
         this.stompClient.connect(headers, (frame) => this.onStompConnected(frame), (msg: any) => this.onStompDisconnected(msg));
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "@state-sync/js-client",
-  "version": "0.0.68",
+  "version": "0.0.70",
   "description": "state-sync client",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -21,7 +21,6 @@
     "typescript": "^2.5.3"
   },
   "scripts": {
-    "prepublish": "npm run build",
     "adduser": "npm adduser",
     "publish": "npm publish --access public",
     "build": "tsc",
@@ -33,6 +32,6 @@
     "jiff": "^0.7.3",
     "jsonpatch": "^3.0.1",
     "uuid": "^3.1.0",
-    "webstomp-client": "^1.0.8"
+    "webstomp-client": "1.0.8"
   }
 }
