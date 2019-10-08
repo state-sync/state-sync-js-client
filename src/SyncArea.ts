@@ -28,11 +28,13 @@ export class SyncArea implements ISyncArea {
     private local: any;
     private ready: boolean;
     private modelVersion: number;
+    private isLocal: boolean;
 
-    constructor(name: string, initialState: any, helper: SyncAreaHelper) {
+    constructor(name: string, initialState: any, helper: SyncAreaHelper, isLocal: boolean) {
         this.initialState = initialState;
         this.helper = helper;
         this.name = name;
+        this.isLocal = isLocal;
         this.subscriptionsCount = 0;
         this.invocations = new InvocationMap();
         this.ready = false;
@@ -40,11 +42,15 @@ export class SyncArea implements ISyncArea {
     }
 
     isReady(): boolean {
-        return this.ready;
+        return this.isLocal || this.ready;
     }
 
     public init() {
-        this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_STATUS', area: this.name, status: 'disconnected', ready: false});
+        if (this.isLocal) {
+            this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_STATUS', area: this.name, status: 'connected', ready: true});
+        } else {
+            this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_STATUS', area: this.name, status: 'disconnected', ready: false});
+        }
     }
 
     public wrap(reducer: any): any {
@@ -63,7 +69,9 @@ export class SyncArea implements ISyncArea {
      * Invoke when connection is ready
      */
     public onReady() {
-        this.doSubscription();
+        if(!this.isLocal) {
+            this.doSubscription();
+        }
     }
 
     public subscribe(): Promise<number> {
@@ -72,6 +80,9 @@ export class SyncArea implements ISyncArea {
     }
 
     private doSubscription(): Promise<number> {
+        if(this.isLocal) {
+            return new Promise((resolve, error) => resolve(0));
+        }
         if (!this.subscribed && this.helper.isFullyConnected()) {
             this.subscribed = true;
             return this.invocations.request(id => {
@@ -84,33 +95,47 @@ export class SyncArea implements ISyncArea {
 
     public unsubscribe() {
         this.subscriptionsCount--;
-        if (this.subscriptionsCount == 0) {
-            this.subscribed = false;
-            this.invocations.request(id => {
-                this.helper.send(new UnsubscribeAreaRequest(id, this.name))
-            });
+        if(!this.isLocal) {
+            if (this.subscriptionsCount == 0) {
+                this.subscribed = false;
+                this.invocations.request(id => {
+                    this.helper.send(new UnsubscribeAreaRequest(id, this.name))
+                });
+            }
         }
     }
 
     public signal(command: string, parameters?: any): Promise<number> {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals to the server'
+        }
         return this.invocations.request(id => {
             this.helper.send(new SignalRequest(id, this.name, command, parameters));
         });
     }
 
     public onSignalResponse(event: SignalResponse) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         if (this.invocations.response(event.forId)) {
             this.pushPatches();
         }
     }
 
     public onSignalError(event: SignalError) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         if (this.invocations.error(event.forId, event.error)) {
             this.pushPatches();
         }
     }
 
     public onSubscribe(event: SubscribeAreaResponse) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         this.ready = true;
         this.invocations.response(event.forId);
         this.config = event.config;
@@ -121,6 +146,9 @@ export class SyncArea implements ISyncArea {
 
     // tslint:disable
     public onUnsubscribe(event: UnsubscribeAreaResponse) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         this.ready = false;
         this.invocations.response(event.forId);
         this.config = new SyncAreaConfig();
@@ -129,10 +157,16 @@ export class SyncArea implements ISyncArea {
     }
 
     public dispatchSyncPatch(event: PatchAreaEvent) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         this.helper.dispatch({type: '@STATE_SYNC/SYNC_AREA_SERVER_PATCH', area: event.area, payload: event.patch});
     }
 
     public onPatchResponse(event: PatchAreaResponse) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         if (this.invocations.response(event.forId)) {
             this.pushPatches();
         }
@@ -146,6 +180,9 @@ export class SyncArea implements ISyncArea {
     }
 
     public onServerPatch(event: PatchAreaEvent) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         if (this.invocations.isEmpty()) {
             this.dispatchSyncPatch(event);
         } else {
@@ -154,10 +191,16 @@ export class SyncArea implements ISyncArea {
     }
 
     public onPatchAreaError(event: PatchAreaError) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         console.error(event);
     }
 
     public onSubscribeError(event: SubscribeAreaError) {
+        if(this.isLocal) {
+            throw 'Local areas do not support signals from the server'
+        }
         console.error(event);
     }
 
@@ -262,10 +305,16 @@ export class SyncArea implements ISyncArea {
             if (fit) {
                 switch (action.type) {
                     case '@STATE_SYNC/SYNC_AREA_INIT':
+                        if(this.isLocal) {
+                            throw 'Local areas do not support signals from the server'
+                        }
                         this.local = action.payload;
                         this.local.syncStateLastUpdateVersion = this.modelVersion++;
                         return this.local;
                     case '@STATE_SYNC/SYNC_AREA_SERVER_PATCH':
+                        if(this.isLocal) {
+                            throw 'Local areas do not support signals from the server'
+                        }
                         this.local = new Patch(action.payload).apply(state);
                         this.local.syncStateLastUpdateVersion = this.modelVersion++;
                         return this.local;
