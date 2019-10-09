@@ -20,9 +20,10 @@ export interface ISyncService {
      * @param initialState - initial state of area
      * @param reducer - optional reducer to perform state modification. Modifications made by this reducer are
      * automatically syncronized to server according sycn rules provided by server during subscription.
+     * @param isLocal - if true, area do not synchronize with server
      * @returns reducer - reducer able for automatic sync of area data
      */
-    declareArea(name: string, initialState: any, reducer?: any): any;
+    declareArea(name: string, initialState: any, reducer?: any, isLocal?: boolean): any;
 
     /**
      * Declare sync status reducer
