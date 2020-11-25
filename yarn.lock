@@ -148,8 +148,8 @@ handlebars@^4.0.6:
     uglify-js "^2.6"
 
 highlight.js@^9.0.0:
-  version "9.12.0"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.12.0.tgz#e6d9dbe57cbefe60751f02af336195870c90c01e"
+  version "9.18.5"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.18.5.tgz#d18a359867f378c138d6819edfc2a8acd5f29825"
 
 inflight@^1.0.4:
   version "1.0.6"
@@ -336,7 +336,7 @@ uuid@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
 
-webstomp-client@^1.0.8:
+webstomp-client@1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/webstomp-client/-/webstomp-client-1.0.8.tgz#0c8bfb0cbe6339ff6b7fe321a5b5d91ad95fd1bb"
 
